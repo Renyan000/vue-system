@@ -1,0 +1,99 @@
+.main-header{
+    position: relative;
+    z-index: 1000;
+    height: 60px;
+    /* background-color: rgba(99,202,48,.5)  !important; */
+    background-color: #501386  !important;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
+}
+.main-header .logo{
+    display: inline-block;
+    line-height: 60px;
+    color: rgba(255,255,255,.8);
+    text-decoration: none;
+    width: 190px;
+    text-align: center;
+    font-size: 18px;
+    /* background-color: #67c23a !important; */
+    /* background-color: #00CCCC !important;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,.25); */
+}
+.main-header .logo:hover{
+    color: white;
+}
+.menuBox{
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    width: 190px;
+    overflow-x: hidden;
+    background-color: #edecec;
+}
+.el-menu{
+    border-right: none!important;
+}
+.el-submenu .el-menu-item {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+.el-submenu__title {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+.el-menu-item:hover,.el-submenu__title:hover{
+    color: #ffffff!important;
+    background-color: #501386 !important;
+}
+.userInfo{
+    position: fixed;
+    right: 50px;
+    top: 0;
+    line-height: 60px;
+    color: white;
+}
+.main{
+    position: fixed;
+    left: 190px;
+    top: 60px;
+    right: 0;
+    bottom: 20px;
+}
+.main .main-top{
+    height: 40px;
+    padding: 0 15px;
+    background-color: #F1EDFC;
+}
+.main .main-top span{
+    line-height: 40px;
+    font-size: 14px;
+}
+.el-button--primary {
+    color: #FFF;
+    background-color: #3A64B6 !important;
+    border-color: #3A64B6 !important;
+}
+.el-button--primary:hover {
+    color: #FFF;
+    background-color: rgb(96, 134, 211) !important;
+    border-color: rgb(96, 134, 211) !important;
+}
+.el-button--danger {
+    color: #FFF;
+    background-color: #B466A6 !important;
+    border-color: #B466A6 !important;
+}
+.el-button--danger:hover {
+    color: #FFF;
+    background-color: rgb(202, 129, 189) !important;
+    border-color: rgb(202, 129, 189) !important;
+}
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+    background-color: #3A64B6;
+    color: #FFF;
+}
+.el-button--primary.is-plain {
+    color: #fff;
+}
+.el-select-dropdown__item.selected {
+    color: #3A64B6;
+}
