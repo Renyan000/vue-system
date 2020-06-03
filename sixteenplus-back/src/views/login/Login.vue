@@ -64,19 +64,19 @@
 		methods:{
 			login(){
 				// let reg = new RegExp("^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$");
-				let reg = /^[1][3,4,5,7,8][0-9]{9}$/;
-				if(!this.login_username){
-					this.$message.error("手机号不能为空")
-					return ;
-				}
-				else if(!reg.test(this.login_username)){
-					this.$message.error("请输入正确的手机号")
-					return ;
-				}
-				if(!this.login_password){
-					this.$message.error("密码不能为空")
-					return ;
-				}
+//				let reg = /^[1][3,4,5,7,8][0-9]{9}$/;
+//				if(!this.login_username){
+//					this.$message.error("手机号不能为空")
+//					return ;
+//				}
+//				else if(!reg.test(this.login_username)){
+//					this.$message.error("请输入正确的手机号")
+//					return ;
+//				}
+//				if(!this.login_password){
+//					this.$message.error("密码不能为空")
+//					return ;
+//				}
 				this.$http({
 					  method:'post',
 						url:'/user/login/submit',

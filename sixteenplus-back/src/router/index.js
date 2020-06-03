@@ -28,6 +28,11 @@ export default new Router({
 					component: () => import('@/views/activityManagement/bannerManagement.vue'),
 				},
 				{
+					path: '/activityManagement/companyManagement',
+					name: 'companyManagement',
+					component: () => import('@/views/activityManagement/companyManagement.vue'),
+				},
+				{
 					path: '/basicDomain/menuManagement',
 					name: 'menuManagement',
 					component: () => import('@/views/basicDomain/menuManagement.vue'),

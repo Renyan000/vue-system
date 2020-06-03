@@ -65,7 +65,7 @@ module.exports = {
 		port:3000,
 		proxy: {
 			"/cms": {
-				target: "http://manager.16medical.com/", // 访问数据的计算机域名
+				target: "http://192.168.2.248:8090", // 访问数据的计算机域名
 				ws: true, // 是否启用websockets
 				changOrigin: true, //开启代理
 				pathRewrite: {
