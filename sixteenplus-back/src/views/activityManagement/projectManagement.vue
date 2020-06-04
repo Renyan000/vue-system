@@ -3,8 +3,8 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
         <div class="formSearch">
-          <label for="">单位名称</label>
-          <el-input v-model="companyName" clearable></el-input>
+          <label for="">项目名称</label>
+          <el-input v-model="projectName" clearable></el-input>
         </div>
       </el-col>
     </el-row>
@@ -16,7 +16,8 @@
     <el-row style="padding: 0 20px">
       <el-scrollbar style="height: 100%">
         <el-table :data="menuList" style="width: 100%" v-loading="loadingIcon">
-          <el-table-column prop="companyName" label="单位名称" width=""></el-table-column>
+          <el-table-column prop="projectName" label="项目名称" width=""></el-table-column>
+          <el-table-column prop="companyNames" label="单位名称" width=""></el-table-column>
           <el-table-column fixed="right" label="操作" width="200">
             <template slot-scope="scope">
               <el-button size="mini" id="btn2" @click="editMenu(scope.row)">修改</el-button>
@@ -28,8 +29,18 @@
     </el-row>
     <el-dialog title="添加" :visible.sync="dialogFormVisible" :modal-append-to-body='false' width="500px">
       <el-form :model="userInfo" ref="userInfo" label-width="100px" >
-        <el-form-item label="单位名称">
-          <el-input v-model="userInfo.companyName" autocomplete="off"></el-input>
+        <el-form-item label="项目名称">
+          <el-input v-model="userInfo.projectName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="单位">
+          <el-select v-model="userInfo.companyIds" multiple clearable placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.id"
+              :label="item.companyName"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -44,7 +55,7 @@
 // @ is an alias to /src
 import {Row,Col,Button,Form,FormItem,Input,Radio,Select,Option} from 'element-ui'
 export default {
-  name: 'companyManagement',
+  name: 'projectManagement',
 	components: {
 		Row,Col,Button,Form,FormItem,Input,Radio,Select,Option
 	},
@@ -53,29 +64,36 @@ export default {
 			loadingIcon: true,
 			menuList: [],
 			dialogFormVisible: false,
-			companyName: '',
+			projectName: '',
+			options: [],
 			userInfo: {
-				companyName: ''
+				projectName: '',
+				companyIds: []
 			}
 		}
 	},
 	created(){
-		this.loading(1);
+		this.loading();
 	},
 	methods: {
 		//新增
 		addMenu(formName){
 			let parm = this.userInfo;
 			let url = "";
-      if(!this.userInfo.companyName){
-        this.$message.error('请填写单位名称！');
+      if(!this.userInfo.projectName){
+        this.$message.error('请填写项目名称！');
         return false;
       }
+      if(!this.userInfo.companyIds || this.userInfo.companyIds.length<=0){
+        this.$message.error('请选择单位！');
+        return false;
+      }
+			this.userInfo.companyIds = this.userInfo.companyIds.toString();
 			if(!this.userInfo.id){//新增
-				url = '/company/add';
+				url = '/project/add';
 			}else{
 				parm.id = this.userInfo.id;
-				url = '/company/update';
+				url = '/project/update';
 			}
 			this.$http({method:'post', url:url, data:parm}).then((result) => {
 				let data = result.data;
@@ -93,21 +111,51 @@ export default {
 		},
 		//清空表单并关闭
 		cancel(formName){
-			this.$refs[formName].resetFields();
+			this.userInfo = {
+				projectName: '',
+					companyIds: []
+			};
 			this.dialogFormVisible = false;
 		},
-		//初始化列表
-		loading(pageNum){
+		loading(){
 			let parm = {
-				pageSize: 10,
-				companyName: this.companyName,
-				pageNumber: pageNum
+				pageSize: 1000,
+				companyName: '',
+				pageNumber: 1
 			}
 			this.$http({method:'post', url:'/company/getListPage', data:parm}).then((result) => {
 				let data = result.data;
 				this.loadingIcon = false;
 				if(data.successful && (data.status==200)){
-          this.menuList = data.data.list;
+					this.options = data.data.list;
+				}else{
+					this.$message.error('查询失败');
+				}
+			},(error) => {
+				this.$message.error('查询失败');
+			});
+		},
+		//初始化列表
+		loading(pageNum){
+			let parm = {
+				pageSize: 10,
+				projectName: this.projectName,
+				pageNumber: pageNum
+			}
+			this.$http({method:'post', url:'/project/getListPage', data:{}}).then((result) => {
+				let data = result.data;
+				this.loadingIcon = false;
+				if(data.successful && (data.status==200)){
+          let menuList = data.data;
+					menuList.map( item =>{
+						for(let comp of item.listCompany){
+							item.companyNames = '';
+							if(item.companyNames){
+								item.companyNames += ','
+							}
+							item.companyNames += comp.companyName
+            }
+          })
 				}else{
 					this.$message.error('查询失败');
 				}
@@ -124,7 +172,7 @@ export default {
 				type: 'warning'
 			}).then(() => {
 				let parm = {id:row.id};
-				this.$http({method:'post', url:'/company/del', data:parm}).then((result) => {
+				this.$http({method:'post', url:'/project/del', data:parm}).then((result) => {
 					let data = result.data;
 					if(data.successful && (data.status==200)){
 						this.$message.success('删除成功');
@@ -142,10 +190,10 @@ export default {
 		editMenu(row){
 			this.dialogFormVisible = true;
 			this.userInfo.id = row.id;
-			this.userInfo.companyName = row.companyName;
+			this.userInfo.projectName = row.projectName;
 		},
 		addMenuBtn(formName){
-			this.userInfo.companyName = "";
+			this.userInfo.projectName = "";
 			this.dialogFormVisible = true;
 		}
 	}
