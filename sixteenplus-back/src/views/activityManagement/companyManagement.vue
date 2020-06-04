@@ -10,7 +10,8 @@
     </el-row>
     <el-row style="padding: 0 20px">
       <el-col :span="24" style="text-align: right">
-        <el-button type="primary" id="btn1" size="small" @click="addMenuBtn">添加</el-button>
+        <el-button type="primary" size="small" @click="addMenuBtn">添加</el-button>
+        <el-button type="primary" size="small" icon="el-icon-search" @click="searchList">搜索</el-button>
       </el-col>
     </el-row>
     <el-row style="padding: 0 20px">
@@ -80,7 +81,7 @@ export default {
 			this.$http({method:'post', url:url, data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					this.loading();
+					this.loading(1);
 					this.$message.success("保存成功！");
 					this.dialogFormVisible = false;
 				}else{
@@ -128,7 +129,7 @@ export default {
 					let data = result.data;
 					if(data.successful && (data.status==200)){
 						this.$message.success('删除成功');
-						this.loading();
+						this.loading(1);
 					}
 				},(error) => {
 					this.$message.error('删除失败');
@@ -147,7 +148,10 @@ export default {
 		addMenuBtn(formName){
 			this.userInfo.companyName = "";
 			this.dialogFormVisible = true;
-		}
+		},
+		searchList(){
+			this.loading(1)
+    }
 	}
 }
 </script>

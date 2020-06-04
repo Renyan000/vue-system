@@ -33,6 +33,11 @@ export default new Router({
 					component: () => import('@/views/activityManagement/companyManagement.vue'),
 				},
 				{
+					path: '/activityManagement/projectManagement',
+					name: 'projectManagement',
+					component: () => import('@/views/activityManagement/projectManagement.vue'),
+				},
+				{
 					path: '/basicDomain/menuManagement',
 					name: 'menuManagement',
 					component: () => import('@/views/basicDomain/menuManagement.vue'),
@@ -51,6 +56,16 @@ export default new Router({
 					path: '/basicDomain/userManagement',
 					name: 'userManagement',
 					component: () => import('@/views/basicDomain/userManagement.vue'),
+				},
+				{
+					path: '/basicDomain/organManagement',
+					name: 'organManagement',
+					component: () => import('@/views/basicDomain/organManagement.vue'),
+				},
+				{
+					path: '/basicDomain/accountManagement',
+					name: 'accountManagement',
+					component: () => import('@/views/basicDomain/accountManagement.vue'),
 				},
 			]
 		}

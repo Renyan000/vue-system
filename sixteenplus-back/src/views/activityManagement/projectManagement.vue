@@ -11,6 +11,7 @@
     <el-row style="padding: 0 20px">
       <el-col :span="24" style="text-align: right">
         <el-button type="primary" id="btn1" size="small" @click="addMenuBtn">添加</el-button>
+        <el-button type="primary" size="small" icon="el-icon-search" @click="searchList">搜索</el-button>
       </el-col>
     </el-row>
     <el-row style="padding: 0 20px">
@@ -73,7 +74,7 @@ export default {
 		}
 	},
 	created(){
-		this.loading();
+		this.loadingList();
 	},
 	methods: {
 		//新增
@@ -98,7 +99,7 @@ export default {
 			this.$http({method:'post', url:url, data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					this.loading();
+					this.loading(1);
 					this.$message.success("保存成功！");
 					this.dialogFormVisible = false;
 				}else{
@@ -117,7 +118,8 @@ export default {
 			};
 			this.dialogFormVisible = false;
 		},
-		loading(){
+		//加载公司下拉
+		loadingList(){
 			let parm = {
 				pageSize: 1000,
 				companyName: '',
@@ -125,9 +127,9 @@ export default {
 			}
 			this.$http({method:'post', url:'/company/getListPage', data:parm}).then((result) => {
 				let data = result.data;
-				this.loadingIcon = false;
 				if(data.successful && (data.status==200)){
 					this.options = data.data.list;
+					this.loading(1)
 				}else{
 					this.$message.error('查询失败');
 				}
@@ -142,20 +144,22 @@ export default {
 				projectName: this.projectName,
 				pageNumber: pageNum
 			}
-			this.$http({method:'post', url:'/project/getListPage', data:{}}).then((result) => {
+			this.$http({method:'post', url:'/project/getListPage', data:parm}).then((result) => {
 				let data = result.data;
 				this.loadingIcon = false;
 				if(data.successful && (data.status==200)){
-          let menuList = data.data;
-					menuList.map( item =>{
-						for(let comp of item.listCompany){
-							item.companyNames = '';
-							if(item.companyNames){
-								item.companyNames += ','
-							}
-							item.companyNames += comp.companyName
-            }
-          })
+          let menuList = data.data.list;
+          for(let i = 0;i < menuList.length;i++){
+          	let item = menuList[i];
+	          item.companyNames = '';
+	          for(let comp of item.listCompany){
+		          if(item.companyNames){
+			          item.companyNames += ','
+		          }
+		          item.companyNames += comp.companyName
+	          }
+          }
+          this.menuList = menuList;
 				}else{
 					this.$message.error('查询失败');
 				}
@@ -176,7 +180,7 @@ export default {
 					let data = result.data;
 					if(data.successful && (data.status==200)){
 						this.$message.success('删除成功');
-						this.loading();
+						this.loading(1);
 					}
 				},(error) => {
 					this.$message.error('删除失败');
@@ -191,11 +195,16 @@ export default {
 			this.dialogFormVisible = true;
 			this.userInfo.id = row.id;
 			this.userInfo.projectName = row.projectName;
+			this.userInfo.companyIds = row.companyIds.split(',');
 		},
 		addMenuBtn(formName){
 			this.userInfo.projectName = "";
+			this.userInfo.companyIds = [];
 			this.dialogFormVisible = true;
-		}
+		},
+		searchList(){
+			this.loading(1)
+    }
 	}
 }
 </script>

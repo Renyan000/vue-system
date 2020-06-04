@@ -6,9 +6,6 @@
       <div class="userInfo">
         <!-- <i class="el-icon-bell" style="cursor: pointer;" @click="showPage('./todoList.html','待办列表','')"></i> -->
         <!-- <i class="redPoit"></i> -->
-		    <a href="http://customer.xiaomaiyouxuan.com/chat/customer" target="_blank">
-            <i class="el-icon-phone-outline" style="margin-right: 20px;font-size: 34px;vertical-align: middle;color: #fff;"></i>
-        </a>
         <el-dropdown style="color:#fff">
           <span style="cursor:pointer;">{{userName}}<i class="el-icon-arrow-down el-icon--right" style="margin-right: 15px"></i></span>
           <el-dropdown-menu slot="dropdown">
