@@ -9,33 +9,9 @@
             </el-col>
             <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
                 <div class="formSearch">
-                    <label for="">邮箱</label>
-                    <el-input v-model="email" clearable></el-input>
-                </div>
-            </el-col>
-            <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
-                <div class="formSearch">
                     <label for="">角色</label>
                     <el-select v-model="roleId" placeholder="请选择">
                         <el-option v-for="item in roleIdOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                    </el-select>
-                </div>
-            </el-col>
-            <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
-                <div class="formSearch">
-                    <label for="">审核状态</label>
-                    <el-select v-model="userStatus" placeholder="请选择">
-                        <el-option v-for="item in userStatusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                    </el-select>
-                </div>
-            </el-col>
-            <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
-                <div class="formSearch">
-                    <label for="">是否可用</label>
-                    <el-select v-model="inUse" placeholder="请选择">
-                        <el-option key="" label="请选择" value=""></el-option>
-                        <el-option key="1" label="是" value="1"></el-option>
-                        <el-option key="0" label="否" value="0"></el-option>
                     </el-select>
                 </div>
             </el-col>
@@ -49,17 +25,13 @@
         <el-row style="padding: 0 20px">
             <el-scrollbar style="height: 100%">
                 <el-table :data="tableData3" style="width: 100%">
-                    <el-table-column fixed prop="name" label="姓名" width="120"></el-table-column>
-                    <el-table-column prop="email" label="邮箱" width="220"></el-table-column>
+                    <el-table-column fixed prop="name" label="姓名" width=""></el-table-column>
                     <el-table-column prop="roleName" label="角色" width=""> </el-table-column>
-                    <el-table-column prop="departmentName" label="所在部门" width="180"> </el-table-column>
-                    <el-table-column prop="userStatusText" label="审核状态" width="80"> </el-table-column>
-                    <el-table-column prop="inUseText" label="是否可用" width="80"> </el-table-column>
+                    <el-table-column prop="inUseText" label="是否可用" width=""> </el-table-column>
                     <el-table-column fixed="right" label="操作" width="230">
                         <template slot-scope="scope">
-                            <el-button v-if="(scope.row.userStatus == '2'||scope.row.userStatus == '3')&&btnArr.indexOf('btn92')>=0" @click="handleClick(scope.row)" size="mini" id="btn92">修改</el-button>
-                            <el-button v-if="(scope.row.userStatus == '2'||scope.row.userStatus == '3')&&btnArr.indexOf('btn93')>=0" size="mini" type="danger" @click="deleteUser(scope.row)" id="btn93">删除</el-button>
-                            <el-button v-if="scope.row.userStatus == '2'&&btnArr.indexOf('btn94')>=0" size="mini" type="success" @click="auditUser(scope.row)" id="btn94">审核</el-button>
+                            <el-button v-if="btnArr.indexOf('btn92')>=0" @click="handleClick(scope.row)" size="mini" id="btn92">修改</el-button>
+                            <el-button v-if="btnArr.indexOf('btn93')>=0" size="mini" type="danger" @click="deleteUser(scope.row)" id="btn93">删除</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -73,53 +45,19 @@
                 <el-form-item label="姓名" prop="name">
                     <el-input v-model="userInfo.name" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="邮箱" prop="email">
-                    <el-input v-model="userInfo.email" autocomplete="off"></el-input>
-                </el-form-item>
                 <el-form-item label="角色" prop="roles">
                     <el-select v-model="userInfo.roles" multiple :multiple-limit="limit" placeholder="请选择角色（可多选）">
                         <el-option v-for="item in roleIdOptions" :label="item.label" :value="item.value" :key="item.id"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="所在部门" prop="departmentIds">
-                    <el-cascader v-model="userInfo.departmentIds" :options="departOptions" :show-all-levels="false"></el-cascader>
-                </el-form-item>
-                <el-form-item label="描述">
-                    <el-input type="textarea" v-model="userInfo.desc"></el-input>
-                </el-form-item>
                 <el-form-item label="是否可用">
                     <el-radio v-model="userInfo.inUse" :label="1">是</el-radio>
                     <el-radio v-model="userInfo.inUse" :label="0">否</el-radio>
-                </el-form-item>
-                <el-form-item label="头像">
-                    <el-upload
-                    class="_avatar-uploader"
-                    action="/address/uploadFiles"
-                    :show-file-list="false"
-                    :on-success="handleAvatarSuccess"
-                    :before-upload="beforeAvatarUpload">
-                    <img v-if="userInfo.imageUrl" :src="userInfo.imageUrl" class="avatar">
-                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                    </el-upload>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button size="small" @click="cancel('userInfo')">取 消</el-button>
                 <el-button size="small" type="primary" @click="addUser('userInfo')">确 定</el-button>
-            </div>
-        </el-dialog>
-        <el-dialog title="用户审核" :visible.sync="dialogFormAudit" :modal-append-to-body='false'>
-            <el-form :model="auditInfo" ref="auditInfo" label-width="100px" >
-                <el-form-item label="审核">
-                    <el-select v-model="auditInfo.userStatus" placeholder="请选择">
-                        <el-option key="1" label="通过" value="1"></el-option>
-                        <el-option key="2" label="打回" value="3"></el-option>
-                    </el-select>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button size="small" @click="cancelConfirm('auditInfo')">取 消</el-button>
-                <el-button size="small" type="primary" @click="auditConfirm('auditInfo')">确 定</el-button>
             </div>
         </el-dialog>
     </div>
@@ -143,24 +81,14 @@ export default {
 			limit: 3,
 			roleIdOptions: [{value: '',label: '请选择'}],
 			departOptions: [{value: '',label: '请选择', children: []}],
-			userStatusOptions:[
-				{value: '',label: '请选择'},
-				{value: '1',label: '通过'},
-				{value: '2',label: '待审核'},
-				{value: '3',label: '打回'},
-			],
 			tableData3: [],
 			dialogFormVisible: false,
 			dialogFormAudit: false,
 			currentPage:1,
 			totalItemsCount:0,
 			userInfo: {
-				imageUrl:'',
 				name: '',
-				email: '',
 				roles: [],
-				departmentIds: [],
-				desc: '',
 				inUse: 1
 			},
 			auditInfo: {
@@ -172,14 +100,8 @@ export default {
 				name: [
 					{ required: true, message: '请输入姓名', trigger: 'blur' }
 				],
-				email: [
-					{ required: true, message: '请输入邮箱', trigger: 'blur' }
-				],
 				roles: [
 					{  type: 'array',required: true, message: '请选择角色', trigger: 'blur' }
-				],
-				departmentIds: [
-					{  type: 'array',required: true, message: '请选择所在部门', trigger: 'blur' }
 				]
 			}
         }
@@ -187,16 +109,9 @@ export default {
     created(){
 		this.loading(1);
 		this.loadRole();
-		this.loadOrgan();
 		this.btnControl();
 	},
 	methods: {
-		handleAvatarSuccess(res, file) {
-			this.userInfo.imageUrl = res.data;
-		},
-		beforeAvatarUpload(file) {
-			return true;
-		},
 		btnControl(){
 			if(window.location.href.indexOf('?')>=0){
 				let btnStr =window.location.href.split('?')[1].split('=')[1];
@@ -214,8 +129,6 @@ export default {
 				if (valid) {
 					var parm = this.userInfo;
 					var url = "";
-					var ids = parm.departmentIds[parm.departmentIds.length - 1];
-					parm.departmentId = ids;
 					if(!this.userInfo.managerId){//新增
 						url = '/backstage/add';
 					}else{//修改
@@ -225,6 +138,7 @@ export default {
 					this.$http({method:'post', url:url, data:parm}).then((result) => {
 						var data = result.data;
 						if(data.successful && (data.status==200)){
+							this.$message.success(data.resultCode.message);
 							this.loading(1);
 							this.dialogFormVisible = false;
 						}else{
@@ -242,12 +156,8 @@ export default {
 		//新增按钮
 		addUserBtn(){
 			delete this.userInfo.managerId;
-			this.userInfo.imageUrl = "";
 			this.userInfo.name = "";
-			this.userInfo.email = "";
 			this.userInfo.roles = [];
-			this.userInfo.departmentIds = [];
-			this.userInfo.desc = '';
 			this.userInfo.inUse = 1;
 			this.dialogFormVisible = true;
 		},
@@ -259,32 +169,10 @@ export default {
 		//修改
 		handleClick(row){
 			this.dialogFormVisible = true;
-			this.userInfo.imageUrl = row.imageUrl;
 			this.userInfo.managerId = row.managerId;
 			this.userInfo.name = row.name;
-			this.userInfo.email = row.email;
 			this.userInfo.roles = row.roles.map(Number);
-			this.userInfo.departmentIds = JSON.parse(row.depart);
-			this.userInfo.desc = row.desc;
 			this.userInfo.inUse = row.inUse;
-		},
-		//加载所在单位
-		loadOrgan(){
-            var vm = this;
-			this.$http({method:'post', url:'/depart/queryChildren', data:{}}).then((result) => {
-				var data = result.data;
-				if(data.successful && data.status == "200"){
-					if(!!data.data){
-						var departInfo = data.data;
-						departInfo.value = departInfo.id;
-						vm.departOptions = [data.data];
-					}
-				}else{
-					vm.$message.error('查询失败');
-				}
-			}).catch(function (error) {
-				vm.$message.error('查询失败');
-			})
 		},
 		//加载角色下拉
 		loadRole(){
@@ -313,13 +201,6 @@ export default {
 					this.totalItemsCount = data.data.total;
 					this.currentPage = data.data.pageNum;
 					for(var i=0;i<this.tableData3.length;i++){
-						if(this.tableData3[i].userStatus == "2"){
-							this.tableData3[i].userStatusText = "待审核";
-						}else if(this.tableData3[i].userStatus == "1"){
-							this.tableData3[i].userStatusText = "通过";
-						}else if(this.tableData3[i].userStatus == "3"){
-							this.tableData3[i].userStatusText = "打回";
-						}
 						if(this.tableData3[i].inUse == "1"){
 							this.tableData3[i].inUseText = "是";
 						}else{
@@ -356,34 +237,7 @@ export default {
 					}).catch(function (error) {
 						vm.$message.error('删除失败');
 				    });
-		        }).catch(() => {
-//			          this.$message({type: 'info',message: '已取消'});          
-		        });
-		},
-		//审核
-		auditUser(row){
-			this.dialogFormAudit = true;
-			this.auditInfo.managerId = row.managerId;
-		},
-		auditConfirm(formName){
-			var vm = this;
-			var data ={managerId:vm.auditInfo.managerId,userStatus:vm.auditInfo.userStatus,auditMessage:""}
-			this.$http({method:'post', url:'/backstage/audit', data:data}).then((result) => {
-				var data = result.data;
-				if(data.successful && (data.status==200)){
-					vm.$message('审核成功');
-					vm.loading(1);
-					vm.dialogFormAudit = false;
-				}else{
-					vm.$message.error('审核失败');
-				}
-			},(error) => {
-				vm.$message.error('审核失败');
-			});
-		},
-		cancelConfirm(formName){
-			this.$refs[formName].resetFields();
-			this.dialogFormAudit = false;
+		        }).catch(() => {});
 		},
 		//搜索按钮
 		searchUserBtn(){

@@ -66,7 +66,7 @@ export default new Router({
 					path: '/basicDomain/accountManagement',
 					name: 'accountManagement',
 					component: () => import('@/views/basicDomain/accountManagement.vue'),
-				},
+				}
 			]
 		}
 	]
