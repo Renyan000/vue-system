@@ -52,6 +52,11 @@ export default new Router({
 					name: 'userManagement',
 					component: () => import('@/views/basicDomain/userManagement.vue'),
 				},
+				{
+					path: '/basicDomain/membership',
+					name: 'membership',
+					component: () => import('@/views/basicDomain/membership.vue'),
+				},
 			]
 		}
 	]
