@@ -18,6 +18,7 @@
       <el-scrollbar style="height: 100%">
         <el-table :data="menuList" style="width: 100%" v-loading="loadingIcon">
           <el-table-column prop="companyName" label="单位名称" width=""></el-table-column>
+		  <el-table-column prop="groupName" label="检查组" width=""></el-table-column>
           <el-table-column fixed="right" label="操作" width="200">
             <template slot-scope="scope">
               <el-button size="mini" id="btn2" @click="editMenu(scope.row)">修改</el-button>
@@ -31,6 +32,16 @@
       <el-form :model="userInfo" ref="userInfo" label-width="100px" >
         <el-form-item label="单位名称">
           <el-input v-model="userInfo.companyName" autocomplete="off"></el-input>
+        </el-form-item>
+		<el-form-item label="检查组">
+          <el-select v-model="userInfo.managerIds" clearable placeholder="请选择">
+            <el-option
+              v-for="item in groupOption"
+              :key="item.id"
+              :label="item.departmentName"
+              :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -55,23 +66,45 @@ export default {
 			menuList: [],
 			dialogFormVisible: false,
 			companyName: '',
+			groupName: '',
+			groupOption: [],
 			userInfo: {
-				companyName: ''
+				companyName: '',
+				managerIds: '',
+				groupName: ''
 			}
 		}
 	},
 	created(){
 		this.loading(1);
+		this.loadingGroup();
 	},
 	methods: {
+		// 组查询
+		loadingGroup() {
+			this.$http({method:'post',url:'/depart/query',data:{}}).then((result) => {
+				if (result.data.status == 200) {
+					this.groupOption = result.data.data.departmentList;
+				}
+			})
+		},
 		//新增
 		addMenu(formName){
 			let parm = this.userInfo;
 			let url = "";
-      if(!this.userInfo.companyName){
-        this.$message.error('请填写单位名称！');
-        return false;
-      }
+			if(!this.userInfo.companyName){
+				this.$message.error('请填写单位名称！');
+				return false;
+			}
+			if(!this.userInfo.managerIds){
+				this.$message.error('请选择检查组！');
+				return false;
+			}
+			this.groupOption.map((item,index) => {
+				if (this.userInfo.managerIds == item.id) {
+					this.userInfo.groupName = item.departmentName
+				}
+			})
 			if(!this.userInfo.id){//新增
 				url = '/company/add';
 			}else{
@@ -144,9 +177,16 @@ export default {
 			this.dialogFormVisible = true;
 			this.userInfo.id = row.id;
 			this.userInfo.companyName = row.companyName;
+			this.groupOption.map((item,index) => {
+				if (row.managerIds == item.id) {
+					this.userInfo.managerIds = item.departmentName;
+				}
+			})
+			// this.userInfo.managerIds = row.managerIds;
 		},
 		addMenuBtn(formName){
 			this.userInfo.companyName = "";
+			this.userInfo.managerIds = "";
 			this.dialogFormVisible = true;
 		},
 		searchList(){
