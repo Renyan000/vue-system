@@ -2,7 +2,8 @@
   <div class="about login-content">
     <div class="lc-block" :style="status=='1'?'z-index: 10;height: 250px;float:left;padding-top:30px;':'display: none'">
 		<div class="n_logo">
-			<img src="../../assets/logo.png" alt="">
+			<!--<img src="../../assets/logo.png" alt="">-->
+			<p>北京物业管理协会</p>
 		</div>
 		<div style="width: 60%;margin: 0 auto">
 			<!--<h1 class="lean">医脉达电商平台</h1>-->
@@ -11,7 +12,7 @@
 						<i class="zmdi zmdi-account"></i>
 					</span>
 				<div class="fg-line">
-				<input type="text" class="form-control" placeholder="手机号" v-model="login_username"/>
+				<input type="text" class="form-control" placeholder="用户名" v-model="login_username"/>
 				</div>
 			</div>
 			<div class="input-group m-b-20">
@@ -135,5 +136,11 @@
   .login-content{
     min-height: 100vh;
     display: flex;
+  }
+  .n_logo {
+	font-size: 30px;
+  }
+  .n_logo p {
+	  margin-top: 0;
   }
 </style>

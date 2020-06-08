@@ -1,7 +1,9 @@
 <template>
   <div class="home">
     <header class="main-header">
-      <router-link class="logo" @click.native="getTittle('首页','')" to="/index" >后台管理系统</router-link>
+      <router-link class="logo" @click.native="getTittle('首页','')" to="/index" >
+        <img src="../../assets/logo1.jpeg" alt="" style="height: 60px;vertical-align:top;">
+      </router-link>
       <!--<div class="tips"></div>-->
       <div class="userInfo">
         <!-- <i class="el-icon-bell" style="cursor: pointer;" @click="showPage('./todoList.html','待办列表','')"></i> -->
@@ -230,7 +232,7 @@
     }
 
     .el-menu-item.is-active a {
-        color: #501386 !important;
+        color: #6bbbf0 !important;
     }
 
     .el-menu-item:hover a {
