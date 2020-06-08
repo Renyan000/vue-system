@@ -2,7 +2,6 @@
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import './plugins/element.js'
 import Axios from 'axios'
 import vueAxios from 'vue-axios'
 import { Message,MessageBox} from 'element-ui';

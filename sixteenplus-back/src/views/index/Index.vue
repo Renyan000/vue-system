@@ -37,7 +37,7 @@
       </el-scrollbar>
     </aside>
     <section class="main">
-      <div class="main-top">
+      <div class="main-top" style="background: #ADD8E6">
         <span>{{tittle}}</span>
       </div>
       <div class="iframeBox">

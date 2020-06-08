@@ -1,6 +1,8 @@
 /**
  * Created by shiyq on 2019/6/19.
  */
+const path = require("path");
+const CompressionPlugin = require('compression-webpack-plugin');//引入gzip压缩插件
 module.exports = {
 	/** 区分打包环境与开发环境
 	 * process.env.NODE_ENV==='production'  (打包环境)
@@ -41,7 +43,24 @@ module.exports = {
 	integrity:false,
 	chainWebpack: () => {},
 
-	configureWebpack: () => {}, // CSS 相关选项
+	configureWebpack:{
+		plugins: [
+			new CompressionPlugin({//gzip压缩配置
+				test:/\.js$|\.html$|\.css/,//匹配文件名
+				threshold:10240,//对超过10kb的数据进行压缩
+				deleteOriginalAssets:false,//是否删除原文件
+			})
+		],
+		externals: {
+			vue: 'Vue',
+			'vuex': 'Vuex',
+			'vue-router': 'VueRouter',
+			'element-ui': 'ELEMENT',
+			'qs': 'Qs',
+			// 'axios': 'Axios',
+			// 'vue-axios': 'vueAxios'
+		}
+	},
 
 	css: {
 		// 将组件内部的css提取到一个单独的css文件（只用在生产环境）
@@ -65,7 +84,7 @@ module.exports = {
 		port:3000,
 		proxy: {
 			"/cms": {
-				target: "http://192.168.2.248:8088", // 访问数据的计算机域名
+				target: "http://192.168.2.248:8090", // 访问数据的计算机域名
 				ws: true, // 是否启用websockets
 				changOrigin: true, //开启代理
 				pathRewrite: {

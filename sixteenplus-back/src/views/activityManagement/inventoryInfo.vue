@@ -36,7 +36,7 @@
                     <el-row style="text-align: left">
                       <el-col> <el-button size="small" type="info" @click="getObj(item)">点击上传</el-button></el-col>
                       <el-col>
-                        <img :src="url" alt="" v-if="!!item.problemImg" v-for="(url,key) in item.problemImg.split(',')" :key="key" height="100px" width="100px">
+                        <img :src="url" alt="" :preview-src-list='url.split(",")' v-if="!!item.problemImg" v-for="(url,key) in item.problemImg.split(',')" :key="key" height="100px">
                       </el-col>
                     </el-row>
                   </el-upload>
@@ -47,6 +47,7 @@
           <el-row>
             <el-col style="text-align: right;margin-top: 10px">
               <el-button size="small" type="primary" @click="saveForm(key)" v-if="type!='check'">保存</el-button>
+              <el-button size="small" @click="goBack">返回</el-button>
             </el-col>
           </el-row>
         </el-tab-pane>
@@ -69,8 +70,9 @@ export default {
 	data: function() {
 		return {
 			managerId: this.$utils.getCookie('managerId'),
-			companyId: this.$route.query.companyId,
-			projectId: this.$route.query.projectId,
+			companyId: '',
+			projectId: '',
+			id:'',
 			type: this.$route.query.type,
 			activeName: '',
       keys: [],
@@ -81,7 +83,11 @@ export default {
 		}
 	},
 	created(){
-  	this.loading();
+		if(this.type == 'add'){
+			this.loading();
+		}else{
+			this.loadingOne();
+    }
   	let options = {
 		  lock: true,
 		  text: 'Loading',
@@ -105,8 +111,8 @@ export default {
 		},
 		loading(){
 			let parm = {
-				companyId: this.companyId,
-				projectId: this.projectId,
+				companyId: this.$route.query.companyId,
+				projectId: this.$route.query.projectId,
 				managerId: this.managerId
 			}
 			this.$http({method:'post', url:'/checklist/startCheck', data:parm}).then((result) => {
@@ -126,6 +132,27 @@ export default {
 				this.$message.error('查询失败');
 			});
     },
+		loadingOne(){
+			let parm = {
+				id: this.$route.query.id
+			}
+			this.$http({method:'post', url:'/checklist/getOne', data:parm}).then((result) => {
+				let data = result.data;
+				if(data.successful && (data.status==200)){
+					this.keys = Object.keys(data.data);
+					this.activeName = this.keys[0];
+					this.dataList = data.data;
+					this.summaryId =this.dataList[this.activeName][0].summaryId;
+					this.$nextTick(() =>{
+						this.loadingInstance.close();
+					})
+				}else{
+					this.$message.error('查询失败');
+				}
+			},(error) => {
+				this.$message.error('查询失败');
+			});
+		},
 		saveForm(key){
 			let parm = this.dataList[key];
 			let acility = true;
@@ -172,6 +199,9 @@ export default {
 			},(error) => {
 				this.$message.error('提交失败');
 			});
+    },
+		goBack(){
+			this.$router.go(-1)
     }
 	}
 }
@@ -180,70 +210,17 @@ export default {
   .inventoryInfo .submitBtn{
     margin-top: 5px;
   }
-  .formSearch {
-    margin-top: 15px;
-    font-size: 14px;
-  }
-  .formSearch label {
-    width: 120px;
-    display: inline-block;
-    text-align: right;
-    padding-right: 15px;
-    line-height: 35px;
-    font-weight: 500;
-  }
-  .el-input {
-    width: 180px;
-  }
-  .el-scrollbar__wrap {
-    overflow-x: hidden;
-  }
-  .el-scrollbar__view{
-    height: 100%;
-  }
-  .iframeBox{
-    width: 100%;
-    height: calc(100% - 40px);
-    overflow-x: hidden;
-  }
-  .el-badge__content.is-fixed{
-    top: 20px;
-  }
-  .redPoit{
-    position: relative;
-    display: inline-block;
-    height: 10px;
-    width: 10px;
-    background-color: red;
-    border-radius: 10px;
-    top: -8px;
-    left: -11px;
-  }
-  .el-scrollbar__wrap{
-    overflow-x: hidden;
-  }
-  .el-menu-item, .el-submenu__title,.el-submenu .el-menu-item{
-    height: 40px;
-    line-height: 40px;
-    font-size: 14px
-  }
-  .el-submenu .el-icon-menu{
-    margin-right: 10px;
-  }
-  .el-scrollbar__wrap {
-	  margin-bottom: 10px !important;
-  }
-  ul{
+  .inventoryInfo ul{
     margin: 0;
   }
-  ul li{
+  .inventoryInfo ul li{
     display: inline-block;
     width: 49%;
   }
-  h4{
+  .inventoryInfo h4{
     display: inline-block;
   }
-  p.pText{
+  .inventoryInfo p.pText{
     padding-left: 40px;
   }
   .inventoryInfo .myRow{

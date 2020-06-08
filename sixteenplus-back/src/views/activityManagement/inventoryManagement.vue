@@ -4,7 +4,7 @@
       <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
         <div class="formSearch">
           <label for="">单位名称</label>
-          <el-select v-model="companyId" placeholder="请选择" @change="choseCom1">
+          <el-select v-model="companyId" clearable placeholder="请选择" @change="choseCom1">
             <el-option v-for="item in companyOptions" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
           </el-select>
         </div>
@@ -12,7 +12,7 @@
       <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
         <div class="formSearch">
           <label for="">项目名称</label>
-          <el-select v-model="projectId" placeholder="请选择">
+          <el-select v-model="projectId" clearable placeholder="请选择">
             <el-option v-for="item in projectOptions1" :key="item.projectId" :label="item.projectName" :value="item.projectId"></el-option>
           </el-select>
         </div>
@@ -35,10 +35,10 @@
           <el-table-column fixed="right" label="操作" width="520">
             <template slot-scope="scope">
               <el-button size="mini" @click="goto(scope.row,'check')" style="margin-left: 10px">查看</el-button>
-              <el-button size="mini" type="info" @click="goto(scope.row,'edit')">修改</el-button>
-              <el-button size="mini" type="warning" @click="editMenu(scope.row,3)">确认</el-button>
-              <el-button size="mini" type="danger" @click="editMenu(scope.row,5)">退回</el-button>
-              <el-button size="mini" type="success " @click="showNameUrl(scope.row,4)">归档</el-button>
+              <el-button size="mini" type="info" v-if="status!='4'" @click="goto(scope.row,'edit')">修改</el-button>
+              <el-button size="mini" type="warning" v-if="status=='2' || status=='5'" @click="editMenu(scope.row,3)">确认</el-button>
+              <el-button size="mini" type="danger" v-if="status=='3'" @click="editMenu(scope.row,5)">退回</el-button>
+              <el-button size="mini" type="success " v-if="status=='3'" @click="showNameUrl(scope.row,4)">归档</el-button>
               <el-button size="mini" type="primary" @click="exportInfo(scope.row)">导出</el-button>
               <el-button size="mini" type="primary" @click="exportImg(scope.row)">导出图片</el-button>
             </template>
@@ -83,7 +83,7 @@
         <el-button size="small" type="primary" :loading="loading1" @click="submitName">确 定</el-button>
       </div>
     </el-dialog>
-    <a href="javascript: ;" id="exportBtn" @click="exportExcal"></a>
+    <a href="javascript: ;" id="exportBtn" target="_blank" @click="exportExcal"></a>
   </div>
 </template>
 
@@ -133,6 +133,10 @@ export default {
 				projectId: this.projectId,
 				pageNumber: pageNum
 			}
+			if(!this.companyId || !this.projectId){
+				this.$message.error('请先选择单位和项目！')
+        return
+      }
 			this.loadingIcon = true;
 			this.$http({method:'post', url:'/checklist/getListPage', data:parm}).then((result) => {
 				let data = result.data;
@@ -200,7 +204,8 @@ export default {
 			this.$http({method:'post', url:'/company/getList', data:{managerId: this.$utils.getCookie("managerId")}}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					this.companyOptions = data.data;
+					let obj = [{id:'',companyName:'请选择'}]
+					this.companyOptions = obj.concat(data.data)
 				}else{
 					this.$message.error('查询失败');
 				}
@@ -213,10 +218,11 @@ export default {
 			this.$http({method:'post', url:'/company/getProjectList', data:{id: id}}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
+					let obj = [{projectId:'',projectName:'请选择'}]
 					if(index === 1){
-						this.projectOptions1 = data.data;
+						this.projectOptions1 = obj.concat(data.data);
 					}else{
-						this.projectOptions2 = data.data;
+						this.projectOptions2 = obj.concat(data.data);
           }
           this.projectId = '';
           this.userInfo.projectId = '';
@@ -231,8 +237,7 @@ export default {
       this.$router.push({
         path: '/activityManagement/inventoryInfo',
 	      query: {
-		      companyId: row.companyId,
-		      projectId: row.projectId,
+		      id: row.id,
           type: type
 	      }
       })
