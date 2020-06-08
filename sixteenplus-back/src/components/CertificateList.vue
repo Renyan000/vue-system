@@ -6,8 +6,7 @@
         <el-table :data="tableData" style="width: 100%">
             <el-table-column prop="picture" label="Picture">
                 <template slot-scope="scope">
-                    <el-image style="width: 100px; height: 100px" v-if="!!scope.row.imageUrl"
-                        :src="scope.row.imageUrl"
+                    <el-image style="width: 100px; height: 100px" v-if="!!scope.row.imageUrl" :src="scope.row.imageUrl"
                         :preview-src-list="scope.row.imageUrl.split(',')">
                     </el-image>
                     <el-image style="width: 100px; height: 100px" v-else :src="scope.row.imageUrl"></el-image>
@@ -98,7 +97,6 @@ export default {
 	    		this.showTips = true;
 			    return false;
         }
-
 	    },
 		//取消
 		cancelConfirm(formName){

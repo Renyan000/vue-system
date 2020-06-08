@@ -38,6 +38,16 @@ export default new Router({
 					component: () => import('@/views/activityManagement/projectManagement.vue'),
 				},
 				{
+					path: '/activityManagement/inventoryManagement',
+					name: 'inventoryManagement',
+					component: () => import('@/views/activityManagement/inventoryManagement.vue'),
+				},
+				{
+					path: '/activityManagement/inventoryInfo',
+					name: 'inventoryInfo',
+					component: () => import('@/views/activityManagement/inventoryInfo.vue'),
+				},
+				{
 					path: '/basicDomain/menuManagement',
 					name: 'menuManagement',
 					component: () => import('@/views/basicDomain/menuManagement.vue'),
@@ -66,7 +76,7 @@ export default new Router({
 					path: '/basicDomain/accountManagement',
 					name: 'accountManagement',
 					component: () => import('@/views/basicDomain/accountManagement.vue'),
-				}
+				},
 			]
 		}
 	]
