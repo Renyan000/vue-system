@@ -28,6 +28,7 @@
                     <el-table-column fixed prop="name" label="姓名" width=""></el-table-column>
                     <el-table-column prop="roleName" label="角色" width=""> </el-table-column>
                     <el-table-column prop="inUseText" label="是否可用" width=""> </el-table-column>
+					<el-table-column prop="departmentName" label="所在部门" width=""> </el-table-column>
                     <el-table-column fixed="right" label="操作" width="230">
                         <template slot-scope="scope">
                             <el-button v-if="btnArr.indexOf('btn92')>=0" @click="handleClick(scope.row)" size="mini" id="btn92">修改</el-button>
@@ -46,8 +47,13 @@
                     <el-input v-model="userInfo.name" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="角色" prop="roles">
-                    <el-select v-model="userInfo.roles" multiple :multiple-limit="limit" placeholder="请选择角色（可多选）">
+                    <el-select v-model="userInfo.roles" placeholder="请选择角色">
                         <el-option v-for="item in roleIdOptions" :label="item.label" :value="item.value" :key="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+				<el-form-item label="所在部门" prop="departmentId">
+					<el-select v-model="userInfo.departmentId" placeholder="请选择所在部门">
+                        <el-option v-for="item in departOptions" :label="item.label" :value="item.value" :key="item.id"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="是否可用">
@@ -78,18 +84,19 @@ export default {
 			userStatus:'',
 			inUse:"",
 			btnArr:[],
-			limit: 3,
 			roleIdOptions: [{value: '',label: '请选择'}],
-			departOptions: [{value: '',label: '请选择', children: []}],
+			departOptions: [],
 			tableData3: [],
+			roleArr: [],
 			dialogFormVisible: false,
 			dialogFormAudit: false,
 			currentPage:1,
 			totalItemsCount:0,
 			userInfo: {
 				name: '',
-				roles: [],
-				inUse: 1
+				roles: '',
+				inUse: 1,
+				departmentId: ''
 			},
 			auditInfo: {
 				managerId: '',
@@ -101,7 +108,10 @@ export default {
 					{ required: true, message: '请输入姓名', trigger: 'blur' }
 				],
 				roles: [
-					{  type: 'array',required: true, message: '请选择角色', trigger: 'blur' }
+					{ required: true, message: '请选择角色', trigger: 'blur' }
+				],
+				departmentId: [
+					{ required: true, message: '请选择所在部门', trigger: 'blur' }
 				]
 			}
         }
@@ -110,6 +120,7 @@ export default {
 		this.loading(1);
 		this.loadRole();
 		this.btnControl();
+		this.loadOrgan();
 	},
 	methods: {
 		btnControl(){
@@ -129,6 +140,12 @@ export default {
 				if (valid) {
 					var parm = this.userInfo;
 					var url = "";
+					this.roleArr.map((item,index) => {
+						if (parm.roles == item.itemName) {
+							parm.roles = item.id;
+						}
+					})
+					parm.roles = (this.userInfo.roles+'').split(',')
 					if(!this.userInfo.managerId){//新增
 						url = '/backstage/add';
 					}else{//修改
@@ -157,8 +174,9 @@ export default {
 		addUserBtn(){
 			delete this.userInfo.managerId;
 			this.userInfo.name = "";
-			this.userInfo.roles = [];
+			this.userInfo.roles = '';
 			this.userInfo.inUse = 1;
+			this.userInfo.departmentId = '';
 			this.dialogFormVisible = true;
 		},
 		//关闭新增
@@ -171,8 +189,24 @@ export default {
 			this.dialogFormVisible = true;
 			this.userInfo.managerId = row.managerId;
 			this.userInfo.name = row.name;
-			this.userInfo.roles = row.roles.map(Number);
+			this.userInfo.roles = row.roleName;
+			this.userInfo.departmentId = row.departmentId;
 			this.userInfo.inUse = row.inUse;
+		},
+		//加载所在单位
+		loadOrgan(){
+			this.$http({method:'post', url:'/depart/queryChildren', data:{}}).then((result) => {
+				var data = result.data;
+				if(data.successful && data.status == "200"){
+					if(!!data.data){
+						this.departOptions = data.data.children;
+					}
+				}else{
+					vm.$message.error('查询失败');
+				}
+			}).catch(function (error) {
+				vm.$message.error('查询失败');
+			})
 		},
 		//加载角色下拉
 		loadRole(){
@@ -180,6 +214,7 @@ export default {
 			this.$http({method:'post', url:'/role/getRoleInfo', data:{}}).then((result) => {
 				var data = result.data;
 				if(data.successful && (data.status==200)){
+					this.roleArr = data.data;
 					for(var i=0;i<data.data.length;i++){
 						vm.roleIdOptions.push({value: data.data[i].id,label: data.data[i].itemName})
 					}
