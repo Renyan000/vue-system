@@ -61,7 +61,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="cancel('userInfo')" >取 消</el-button>
-        <el-button size="small" type="primary" @click="addMenu('userInfo')">确 定</el-button>
+        <el-button size="small" type="primary" :loading="loading2" @click="addMenu('userInfo')">确 定</el-button>
       </div>
     </el-dialog>
     <el-dialog title="归档" :visible.sync="dialogFormVisible2" :modal-append-to-body='false' width="500px">
@@ -109,6 +109,7 @@ export default {
 			},
 			info: {},
 			loading1: false,
+			loading2: false,
 			signImg: '',//签名照
 			parms: ''
 		}
@@ -172,14 +173,32 @@ export default {
 			if(!this.userInfo.companyId || !this.userInfo.projectId){
 				this.$message.error('请选择项目和单位!');
       }else{
-        this.$router.push({
-          path: './inventoryInfo',
-          query: {
-	          companyId: this.userInfo.companyId,
-	          projectId: this.userInfo.projectId,
-            type: 'add'
+				this.loading2 = true;
+				let parm = {
+					companyId: this.userInfo.companyId,
+					projectId: this.userInfo.projectId,
+					managerId: this.this.$utils.getCookie('managerId')
+				}
+				this.$http({method:'post', url:'/checklist/startCheck', data:parm}).then((result) => {
+					let data = result.data;
+					if(data.successful && (data.resultCode.code=== 'FAIL')){
+						this.$message.error(data.resultCode.message)
+					}else if(data.successful && (data.resultCode.code=== 'SUCCESS')){
+						this.$router.push({
+							path: './inventoryInfo',
+							query: {
+								companyId: this.userInfo.companyId,
+								projectId: this.userInfo.projectId,
+								type: 'add'
+							}
+						})
+					}else{
+						this.$message.error('查询失败');
           }
-        })
+					this.loading2 = false;
+				},(error) => {
+					this.$message.error('查询失败');
+				});
       }
 		},
 		cancel(){

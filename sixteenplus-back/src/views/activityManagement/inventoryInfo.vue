@@ -10,14 +10,14 @@
             <el-col :span="12">
               <ul>
                 <li><h4>总项：</h4>{{`${item.totalItemName}`}}</li>
-                <li><h4>分项：</h4>{{`${item.subitemName}`}}</li>
+                <li v-if="item.totalItemName != '项目亮点'"><h4>分项：</h4>{{`${item.subitemName}`}}</li>
               </ul>
               <p class="pText">{{item.checksName}}</p>
               <p class="pText" v-if="!!item.checkpointsName" v-html="item.checkpointsName.replace(/\n|\r\n/g, '<br>')"></p>
             </el-col>
             <el-col :span="12">
               <el-form label-width="100px">
-                <el-form-item label="检查结果：">
+                <el-form-item label="检查结果：" v-if="item.totalItemName != '项目亮点'">
                   <el-radio-group v-model="item.checkResult">
                     <el-radio :label="1">是</el-radio>
                     <el-radio :label="2">否</el-radio>
@@ -29,7 +29,7 @@
                 </el-form-item>
                 <el-form-item label="问题图片：">
                   <el-upload
-                    action="/cms/address/uploadFiles"
+                    action="/address/uploadFiles"
                     :on-success="handleAvatarSuccess"
                     :before-upload="beforeAvatarUpload"
                     multiple :show-file-list="false">
@@ -139,9 +139,12 @@ export default {
 			this.$http({method:'post', url:'/checklist/getOne', data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					this.keys = Object.keys(data.data);
+//					this.keys = Object.keys(data.data);
+					let keys = ['one','two','third'];
+					this.keys = ['运营管理','使用监督','其他']
 					this.activeName = this.keys[0];
-					this.dataList = data.data;
+					let lists = [data.data[keys[0]],data.data[keys[1]],data.data[keys[2]]];
+					this.dataList = lists;
 					this.summaryId =this.dataList[this.activeName][0].summaryId;
 					this.$nextTick(() =>{
 						this.loadingInstance.close();
@@ -182,8 +185,9 @@ export default {
     },
 		//提交
 		submitAll(){
+			console.log("222")
 			let parm = {summaryId: this.summaryId,status : 2,managerId : this.$utils.getCookie('managerId')}
-			this.$http({method:'post', url:'/checklist/save', data:parm}).then((result) => {
+			this.$http({method:'post', url:'/checklist/submit', data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
 					this.$message({
@@ -209,6 +213,12 @@ export default {
 <style>
   .inventoryInfo .submitBtn{
     margin-top: 5px;
+    float: right;
+    position: relative;
+    z-index: 999;
+  }
+  .inventoryInfo .el-form{
+    margin-top: 10px;
   }
   .inventoryInfo ul{
     margin: 0;
