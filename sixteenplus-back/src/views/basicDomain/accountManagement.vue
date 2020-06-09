@@ -18,18 +18,18 @@
                 </el-scrollbar>
             </el-col>
             <el-col :span="19" >
-                <div class="formSearch">
+                <!--<div class="formSearch">
                     <label for="">账号</label>
                     <el-input v-model="email" clearable></el-input>
-                </div>
-                <div style="text-align: right">
+                </div>-->
+                <!--<div style="text-align: right">
                     <el-button type="primary" size="small" @click="search" icon="el-icon-search">搜索</el-button>
-                </div>
+                </div>-->
                 <el-scrollbar style="height: 100%">
                     <el-table :data="tableData3" style="width: 100%;">
-                        <el-table-column fixed prop="email" label="登录邮箱" width=""></el-table-column>
-                        <el-table-column prop="name" label="姓名" width="200"></el-table-column>
-                        <el-table-column prop="inUseText" label="是否停用" width="120"> </el-table-column>
+                        <!--<el-table-column fixed prop="email" label="登录邮箱" width=""></el-table-column>-->
+                        <el-table-column prop="name" label="姓名" width=""></el-table-column>
+                        <el-table-column prop="inUseText" label="是否停用" width=""> </el-table-column>
                     </el-table>
                     <el-row class="paggingBox">
                         <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" background layout="prev, pager, next" :total="total"></el-pagination>
