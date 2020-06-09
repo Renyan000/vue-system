@@ -15,7 +15,7 @@ Vue.prototype.$confirm = MessageBox.confirm;
 Vue.prototype.$utils = utils;
 Vue.config.productionTip = false
 // Axios.defaults.timeout = 15000 // 请求超时
- Axios.defaults.baseURL = '/cms/'
+//  Axios.defaults.baseURL = '/cms/'
 
 new Vue({
   router,

@@ -51,8 +51,8 @@
                         <el-option v-for="item in roleIdOptions" :label="item.label" :value="item.value" :key="item.id"></el-option>
                     </el-select>
                 </el-form-item>
-				<el-form-item label="所在部门" prop="departmentId">
-					<el-select v-model="userInfo.departmentId" placeholder="请选择所在部门">
+                <el-form-item label="所在部门">
+                  <el-select v-model="userInfo.departmentId" placeholder="请选择所在部门">
                         <el-option v-for="item in departOptions" :label="item.label" :value="item.value" :key="item.id"></el-option>
                     </el-select>
                 </el-form-item>
@@ -110,9 +110,6 @@ export default {
 				roles: [
 					{ required: true, message: '请选择角色', trigger: 'blur' }
 				],
-				departmentId: [
-					{ required: true, message: '请选择所在部门', trigger: 'blur' }
-				]
 			}
         }
     },

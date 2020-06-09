@@ -24,5 +24,8 @@ export default {
 }
 .el-image-viewer__mask {
   top: 60px;
-}
+}.
+  .el-pagination{
+    margin-top: 10px;
+ }
 </style>

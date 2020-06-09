@@ -5,8 +5,8 @@
     </div>
     <el-row style="padding: 0 20px">
       <el-tabs type="card"  v-model="activeName">
-        <el-tab-pane :label="key" :name="key" v-for="(value,key,index) in dataList" :key="index">
-          <el-row v-for="(item,j) in value" class="myRow" :key="j">
+        <el-tab-pane :label="name" :name="name" v-for="(name,key) in keys" :key="key">
+          <el-row v-for="(item,j) in dataList[key]" class="myRow" :key="j">
             <el-col :span="12">
               <ul>
                 <li><h4>总项：</h4>{{`${item.totalItemName}`}}</li>
@@ -28,18 +28,24 @@
                   <el-input type="textarea" v-model="item.problemDesc" :rows="4" style="width: 100%"></el-input>
                 </el-form-item>
                 <el-form-item label="问题图片：">
+                  <el-row style="text-align: left">
                   <el-upload
                     action="/address/uploadFiles"
                     :on-success="handleAvatarSuccess"
                     :before-upload="beforeAvatarUpload"
                     multiple :show-file-list="false">
-                    <el-row style="text-align: left">
                       <el-col> <el-button size="small" type="info" @click="getObj(item)">点击上传</el-button></el-col>
-                      <el-col>
-                        <img :src="url" alt="" :preview-src-list='url.split(",")' v-if="!!item.problemImg" v-for="(url,key) in item.problemImg.split(',')" :key="key" height="100px">
-                      </el-col>
-                    </el-row>
                   </el-upload>
+                    <el-col>
+                      <el-image  :src="url" alt="" :preview-src-list='url.split(",")' v-if="!!item.problemImg" v-for="(url,i) in item.problemImg"
+                         :key="i" class="imgShow"></el-image>
+                      <div class="imgbox">
+                          <i class="el-icon-delete" v-if="!!item.problemImg" v-for="(url,i) in item.problemImg"
+                             style="color: red;font-size: 24px;text-align: center;width: 60px;cursor: pointer;margin-right: 8px;display: inline-block"
+                             @click.stop="deleteImg(item,i)"></i>
+                      </div>
+                    </el-col>
+                  </el-row>
                 </el-form-item>
               </el-form>
             </el-col>
@@ -75,7 +81,7 @@ export default {
 			id:'',
 			type: this.$route.query.type,
 			activeName: '',
-      keys: [],
+      keys: ['运营管理','使用监督','其他'],
 			loadingInstance: '',
       imgObj: {},
 			dataList: [],
@@ -98,18 +104,15 @@ export default {
 	methods: {
 		getObj(item){
 		  this.imgObj = item;
-		  if(!this.imgObj.problemImg){this.imgObj.problemImg = ''}
     },
 		handleAvatarSuccess(res, file) {
-			if(this.imgObj.problemImg){
-				this.imgObj.problemImg += ','
-      }
-			this.imgObj.problemImg += res.data;
+			this.imgObj.problemImg.push(res.data)
 		},
 		beforeAvatarUpload(file) {
 				return true;
 		},
 		loading(){
+			let vm = this;
 			let parm = {
 				companyId: this.$route.query.companyId,
 				projectId: this.$route.query.projectId,
@@ -118,36 +121,18 @@ export default {
 			this.$http({method:'post', url:'/checklist/startCheck', data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					this.keys = Object.keys(data.data);
-					this.activeName = this.keys[0];
-					this.dataList = data.data;
-					this.summaryId =this.dataList[this.activeName][0].summaryId;
-          this.$nextTick(() =>{
-	          this.loadingInstance.close();
-          })
-				}else{
-					this.$message.error('查询失败');
-				}
-			},(error) => {
-				this.$message.error('查询失败');
-			});
-    },
-		loadingOne(){
-			let parm = {
-				id: this.$route.query.id
-			}
-			this.$http({method:'post', url:'/checklist/getOne', data:parm}).then((result) => {
-				let data = result.data;
-				if(data.successful && (data.status==200)){
-//					this.keys = Object.keys(data.data);
 					let keys = ['one','two','third'];
-					this.keys = ['运营管理','使用监督','其他']
-					this.activeName = this.keys[0];
+					vm.activeName = vm.keys[0];
 					let lists = [data.data[keys[0]],data.data[keys[1]],data.data[keys[2]]];
-					this.dataList = lists;
-					this.summaryId =this.dataList[this.activeName][0].summaryId;
-					this.$nextTick(() =>{
-						this.loadingInstance.close();
+					vm.dataList = lists;
+					vm.summaryId =vm.dataList[0][0].summaryId;
+					for (let i =0;i <vm.dataList.length;i++){
+						for (let j =0;j <vm.dataList[i].length;j++){
+              vm.dataList[i][j].problemImg = []
+						}
+					}
+					vm.$nextTick(() =>{
+						vm.loadingInstance.close();
 					})
 				}else{
 					this.$message.error('查询失败');
@@ -155,13 +140,51 @@ export default {
 			},(error) => {
 				this.$message.error('查询失败');
 			});
+    },
+		deleteImg(item,i){
+			item.problemImg.splice(i,1)
+    },
+		loadingOne(){
+			let parm = {
+				id: this.$route.query.id
+			}
+			let vm = this;
+			vm.$http({method:'post', url:'/checklist/getOne', data:parm}).then((result) => {
+				let data = result.data;
+				if(data.successful && (data.status==200)){
+					let keys = ['one','two','third'];
+					vm.activeName = vm.keys[0];
+					vm.dataList = [data.data[keys[0]],data.data[keys[1]],data.data[keys[2]]];
+					vm.summaryId =vm.dataList[0][0].summaryId;
+					for (let i =0;i <vm.dataList.length;i++){
+						for (let j =0;j <vm.dataList[i].length;j++){
+							if(!!vm.dataList[i][j].problemImg){
+								vm.dataList[i][j].problemImg = vm.dataList[i][j].problemImg.split(',')
+							}else{
+								vm.dataList[i][j].problemImg = []
+							}
+						}
+					}
+					vm.$nextTick(() =>{
+						vm.loadingInstance.close();
+					})
+				}else{
+					vm.$message.error('查询失败');
+				}
+			},(error) => {
+				vm.$message.error('查询失败');
+			});
 		},
 		saveForm(key){
 			let parm = this.dataList[key];
 			let acility = true;
+			let vm = this;
 			for(let i =0; i< parm.length;i++){
+				if(parm[i].totalItemName === '项目亮点'){
+					continue
+        }
       	if(!parm[i].checkResult){
-          this.$message.error('第'+(i +1)+'条问题没有选择检查结果')
+		      vm.$message.error('第'+(i +1)+'条问题没有选择检查结果')
 		      acility = false
           break;
         }
@@ -169,39 +192,49 @@ export default {
       if(!acility){
 				return false
       }
-			this.$http({method:'post', url:'/checklist/save', data:parm}).then((result) => {
+			for (let i =0;i <vm.dataList.length;i++){
+				for (let j =0;j <vm.dataList[i].length;j++){
+					if(!!vm.dataList[i][j].problemImg){
+						vm.dataList[i][j].problemImg = vm.dataList[i][j].problemImg.join(',')
+					}else{
+						vm.dataList[i][j].problemImg = ''
+					}
+				}
+			}
+			vm.$http({method:'post', url:'/checklist/save', data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					this.$message({
+					vm.$message({
 						type: 'success',
 						message: "保存成功！"
           })
+          window.location.reload()
 				}else{
-					this.$message.error('查询失败');
+					vm.$message.error('保存失败');
 				}
 			},(error) => {
-				this.$message.error('查询失败');
+				vm.$message.error('保存失败');
 			});
     },
 		//提交
 		submitAll(){
-			console.log("222")
+			let vm = this;
 			let parm = {summaryId: this.summaryId,status : 2,managerId : this.$utils.getCookie('managerId')}
-			this.$http({method:'post', url:'/checklist/submit', data:parm}).then((result) => {
+			vm.$http({method:'post', url:'/checklist/submit', data:parm}).then((result) => {
 				let data = result.data;
-				if(data.successful && (data.status==200)){
-					this.$message({
+				if(data.successful && (data.resultCode.code=='SUCCESS')){
+					vm.$message({
 						type: 'success',
 						message: "提交成功！",
 						onClose : function () {
-              this.$router.go(-1)
+							vm.$router.go(-1)
 						}
 					})
 				}else{
-					this.$message.error('提交失败');
+					vm.$message.error(data.resultCode.message);
 				}
 			},(error) => {
-				this.$message.error('提交失败');
+				vm.$message.error('提交失败');
 			});
     },
 		goBack(){
@@ -219,6 +252,18 @@ export default {
   }
   .inventoryInfo .el-form{
     margin-top: 10px;
+  }
+  .inventoryInfo .el-icon-circle-close{
+    color: #fff;
+  }
+  .inventoryInfo .imgbox{
+    height: 30px;
+    margin-top: 6px;
+  }
+  .imgShow{
+    width: 60px;height: auto;
+    margin-right: 8px;
+    vertical-align: middle;
   }
   .inventoryInfo ul{
     margin: 0;

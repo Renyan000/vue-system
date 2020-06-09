@@ -77,6 +77,11 @@ export default new Router({
 					name: 'accountManagement',
 					component: () => import('@/views/basicDomain/accountManagement.vue'),
 				},
+				{
+					path: '/basicDomain/visitPathAudit',
+					name: 'visitPathAudit',
+					component: () => import('@/views/basicDomain/visitPathAudit.vue'),
+				},
 			]
 		}
 	]

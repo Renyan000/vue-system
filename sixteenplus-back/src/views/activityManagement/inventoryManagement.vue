@@ -4,7 +4,7 @@
       <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
         <div class="formSearch">
           <label for="">单位名称</label>
-          <el-select v-model="companyId" clearable placeholder="请选择" @change="choseCom1">
+          <el-select v-model="companyId" clearable filterable placeholder="请选择" @change="choseCom1">
             <el-option v-for="item in companyOptions" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
           </el-select>
         </div>
@@ -12,7 +12,7 @@
       <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
         <div class="formSearch">
           <label for="">项目名称</label>
-          <el-select v-model="projectId" clearable placeholder="请选择">
+          <el-select v-model="projectId" clearable filterable placeholder="请选择">
             <el-option v-for="item in projectOptions1" :key="item.projectId" :label="item.projectName" :value="item.projectId"></el-option>
           </el-select>
         </div>
@@ -35,10 +35,10 @@
           <el-table-column fixed="right" label="操作" width="520">
             <template slot-scope="scope">
               <el-button size="mini" @click="goto(scope.row,'check')" style="margin-left: 10px">查看</el-button>
-              <el-button size="mini" type="info" v-if="status!='4'" @click="goto(scope.row,'edit')">修改</el-button>
-              <el-button size="mini" type="warning" v-if="status=='2' || status=='5'" @click="editMenu(scope.row,3)">确认</el-button>
-              <el-button size="mini" type="danger" v-if="status=='3'" @click="editMenu(scope.row,5)">退回</el-button>
-              <el-button size="mini" type="success " v-if="status=='3'" @click="showNameUrl(scope.row,4)">归档</el-button>
+              <el-button size="mini" type="info" v-if="scope.row.status=='1'||scope.row.status=='5'" @click="goto(scope.row,'edit')">修改</el-button>
+              <el-button size="mini" type="warning" v-if="scope.row.status=='2' || scope.row.status=='5'" @click="editMenu(scope.row,3)">确认</el-button>
+              <el-button size="mini" type="danger" v-if="scope.row.status=='3'" @click="editMenu(scope.row,5)">退回</el-button>
+              <el-button size="mini" type="success " v-if="scope.row.status=='3'" @click="showNameUrl(scope.row,4)">归档</el-button>
               <el-button size="mini" type="primary" @click="exportInfo(scope.row)">导出</el-button>
               <el-button size="mini" type="primary" @click="exportImg(scope.row)">导出图片</el-button>
             </template>
@@ -134,10 +134,10 @@ export default {
 				projectId: this.projectId,
 				pageNumber: pageNum
 			}
-			if(!this.companyId || !this.projectId){
-				this.$message.error('请先选择单位和项目！')
-        return
-      }
+//			if(!this.companyId || !this.projectId){
+//				this.$message.error('请先选择单位和项目！')
+//        return
+//      }
 			this.loadingIcon = true;
 			this.$http({method:'post', url:'/checklist/getListPage', data:parm}).then((result) => {
 				let data = result.data;
@@ -170,34 +170,34 @@ export default {
     },
 		//新增
 		addMenu(formName){
-			if(!this.userInfo.companyId || !this.userInfo.projectId){
-				this.$message.error('请选择项目和单位!');
+			let vm = this;
+			if(!vm.userInfo.companyId || !vm.userInfo.projectId){
+				vm.$message.error('请选择项目和单位!');
       }else{
-				this.loading2 = true;
+				vm.loading2 = true;
 				let parm = {
-					companyId: this.userInfo.companyId,
-					projectId: this.userInfo.projectId,
-					managerId: this.this.$utils.getCookie('managerId')
+					companyId: vm.userInfo.companyId,
+					projectId: vm.userInfo.projectId
 				}
-				this.$http({method:'post', url:'/checklist/startCheck', data:parm}).then((result) => {
+				vm.$http({method:'post', url:'/checklist/isCan', data:parm}).then((result) => {
 					let data = result.data;
-					if(data.successful && (data.resultCode.code=== 'FAIL')){
-						this.$message.error(data.resultCode.message)
+					if(!data.successful && (data.resultCode.code=== 'FAIL')){
+						vm.$message.error(data.resultCode.message)
 					}else if(data.successful && (data.resultCode.code=== 'SUCCESS')){
-						this.$router.push({
+						vm.$router.push({
 							path: './inventoryInfo',
 							query: {
-								companyId: this.userInfo.companyId,
-								projectId: this.userInfo.projectId,
+								companyId: vm.userInfo.companyId,
+								projectId: vm.userInfo.projectId,
 								type: 'add'
 							}
 						})
 					}else{
-						this.$message.error('查询失败');
+						vm.$message.error('查询失败');
           }
-					this.loading2 = false;
+					vm.loading2 = false;
 				},(error) => {
-					this.$message.error('查询失败');
+					vm.$message.error('查询失败');
 				});
       }
 		},
@@ -279,16 +279,11 @@ export default {
       if(index === 4){
 	      parm.signImg = this.info.signImg;
       }
-			this.$http({method:'post', url:'/checklist/submit', data:{id: id}}).then((result) => {
+			this.$http({method:'post', url:'/checklist/submit', data:parm}).then((result) => {
 				let data = result.data;
 				if(data.successful && (data.status==200)){
-					if(index === 1){
-						this.projectOptions1 = data.data;
-					}else{
-						this.projectOptions2 = data.data;
-					}
-					this.projectId = '';
-					this.userInfo.projectId = '';
+					this.$message.success('操作成功！')
+          this.loading(1);
 				}else{
 					this.$message.error('查询失败');
 				}
