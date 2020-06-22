@@ -1,52 +1,34 @@
 <template>
   <div class="about login-content">
-    <div class="lc-block" :style="status=='1'?'z-index: 10;height: 250px;float:left;padding-top:30px;':'display: none'">
-		<div class="n_logo">
-			<!--<img src="../../assets/logo.png" alt="">-->
-			<p>北京物业管理协会</p>
-		</div>
-		<div style="width: 60%;margin: 0 auto">
-			<!--<h1 class="lean">医脉达电商平台</h1>-->
-			<div class="input-group m-b-20" style="margin-top: 40px;">
-					<span class="input-group-addon">
-						<i class="zmdi zmdi-account"></i>
-					</span>
-				<div class="fg-line">
-				<input type="text" class="form-control" placeholder="用户名" v-model="login_username"/>
-				</div>
-			</div>
-			<div class="input-group m-b-20">
-					<span class="input-group-addon">
-						<i class="zmdi zmdi-male"></i>
-					</span>
-				<div class="fg-line">
-				<input type="password" class="form-control" placeholder="密码" v-model="login_password" @keyup.enter="login"/>
-				</div>
-			</div>
-			<a href="javascript:;" class="btn btn-login btn-danger btn-float" @click="login">
-				<i class="zmdi zmdi-arrow-forward"></i>
-			</a>
-			</div>
-      <!-- <ul class="login-navigation">
-        <li class="bgm-orange" @click="status = 2">忘记密码?</li>
-      </ul> -->
-    </div>
-
-    <div class="lc-block" :style="status=='2'?'z-index: 10;height: 250px;':'display: none'">
-      <h1 class="lean">密码找回</h1>
-      <div class="input-group m-b-20" style="margin-top:70px;">
-        <span class="input-group-addon"><i class="zmdi zmdi-email"></i></span>
+	<div>
+		<span style="position: absolute;font-size: 40px;color: rgb(255, 222, 0);left: 200px;top: 150px;">北京市公共租赁住房检查系统</span>
+	<div>
+		<span style="position: absolute;left: 200px;top: 210px;font-size: 18px;color: rgb(234, 55, 55);">BEIJING PUBLIC RENTAL HOUSING INSPECTION SYSTEM</span>
+	</div>
+	</div>
+    <div class="lc-block" :style="status=='1'?'z-index: 10;height: 450px;left: 25%;':'display: none'">
+      <h1 class="lean">
+		  <img src="../../assets/logo.png" alt="" height="125px" width="125px">
+	  </h1>
+      <div class="input-group m-b-20" style="margin-top: 40px;">
+    		<span class="input-group-addon">
+    			<i class="iconfont" style="color:rgb(255, 222, 0);font-size: 20px;">&#xe681;</i>
+    		</span>
         <div class="fg-line">
-          <input type="text" class="form-control" v-model="email" placeholder="邮箱" />
+          <input type="text" class="form-control" placeholder="用户名" v-model="login_username"/>
         </div>
       </div>
-      <a href="" class="btn btn-login btn-danger btn-float" id="getPassword">
-        <i class="zmdi zmdi-arrow-forward"></i>
-      </a>
-
-      <ul class="login-navigation">
-        <li class="bgm-green" @click="status = 1">返回登录</li>
-      </ul>
+      <div class="input-group m-b-20">
+    		<span class="input-group-addon">
+    			<i class="iconfont" style="color:rgb(255, 222, 0);font-size: 18px;">&#xe62a;</i>
+    		</span>
+        <div class="fg-line">
+          <input type="password" class="form-control" placeholder="密码" v-model="login_password" @keyup.enter="login"/>
+        </div>
+      </div>
+	  <div class="login" @click="login">
+		登录
+	  </div>
     </div>
   </div>
 </template>
@@ -64,20 +46,14 @@
     },
 		methods:{
 			login(){
-				// let reg = new RegExp("^[a-z0-9A-Z]+[- | a-z0-9A-Z . _]+@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-z]{2,}$");
-//				let reg = /^[1][3,4,5,7,8][0-9]{9}$/;
-//				if(!this.login_username){
-//					this.$message.error("手机号不能为空")
-//					return ;
-//				}
-//				else if(!reg.test(this.login_username)){
-//					this.$message.error("请输入正确的手机号")
-//					return ;
-//				}
-//				if(!this.login_password){
-//					this.$message.error("密码不能为空")
-//					return ;
-//				}
+				if(!this.login_username){
+					this.$message.error("用户名不能为空")
+					return ;
+				}
+				if(!this.login_password){
+					this.$message.error("密码不能为空")
+					return ;
+				}
 				this.$http({
 					  method:'post',
 						url:'/user/login/submit',
@@ -121,11 +97,33 @@
 					console.log(err)
 				})
 			},
+			forget(){
+				if(!this.email){
+					this.$message.error("邮箱不能为空")
+					return ;
+				}
+				var data = new Object();
+				data.email = this.email;
+				this.$http({
+					method:'post',
+					url:'/user/password/forget',
+					headers: {'dataType':'json', 'content-type': 'application/json' },
+					data: data
+				}).then(res => {
+					let rs = res.data;
+          if(rs.resultCode.code != 'SUCCESS'){
+	          this.$message.error(rs.resultCode.message);
+          }else{
+	          this.$message.success(rs.resultCode.message)
+          }
+				}).catch(err => {//请求失败后的处理函数
+					console.log(err)
+				})
+      }
 		}
 	};
 </script>
 <style scoped>
-  @import "./css/material-design-iconic-font/css/material-design-iconic-font.min.css";
   @import "./css/app.min.1.css";
   .about{
     font-weight: 400;
@@ -136,11 +134,5 @@
   .login-content{
     min-height: 100vh;
     display: flex;
-  }
-  .n_logo {
-	font-size: 30px;
-  }
-  .n_logo p {
-	  margin-top: 0;
   }
 </style>

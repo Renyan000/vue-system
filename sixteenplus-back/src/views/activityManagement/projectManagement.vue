@@ -28,6 +28,11 @@
         </el-table>
       </el-scrollbar>
     </el-row>
+    <el-row class="paggingBox">
+      <el-col :span="24">
+        <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" background layout="prev, pager, next" :total="totalItemsCount"></el-pagination>
+      </el-col>
+    </el-row>
     <el-dialog title="添加" :visible.sync="dialogFormVisible" :modal-append-to-body='false' width="500px">
       <el-form :model="userInfo" ref="userInfo" label-width="100px" >
         <el-form-item label="项目名称">
@@ -70,7 +75,9 @@ export default {
 			userInfo: {
 				projectName: '',
 				companyIds: []
-			}
+			},
+			currentPage:1,
+			totalItemsCount:0,
 		}
 	},
 	created(){
@@ -149,6 +156,8 @@ export default {
 				this.loadingIcon = false;
 				if(data.successful && (data.status==200)){
           let menuList = data.data.list;
+					this.totalItemsCount = data.data.total;
+					this.currentPage = data.data.pageNum;
           for(let i = 0;i < menuList.length;i++){
           	let item = menuList[i];
 	          item.companyNames = '';
@@ -204,7 +213,11 @@ export default {
 		},
 		searchList(){
 			this.loading(1)
-    }
+    },
+		//分页触发事件
+		handleCurrentChange(val){
+			this.loading(val)
+		},
 	}
 }
 </script>

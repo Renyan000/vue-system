@@ -33,6 +33,7 @@
                     action="/address/uploadFiles"
                     :on-success="handleAvatarSuccess"
                     :before-upload="beforeAvatarUpload"
+                    :accept="'image/*'"
                     multiple :show-file-list="false">
                       <el-col> <el-button size="small" type="info" @click="getObj(item)">点击上传</el-button></el-col>
                   </el-upload>
@@ -63,15 +64,9 @@
 </template>
 
 <script>
-	import {Row,Col,Button,Form,FormItem,Input,Radio,Select,Option,Loading} from 'element-ui'
-	import ElRow from "element-ui/packages/row/src/row";
-	import ElCol from "element-ui/packages/col/src/col";
-// @ is an alias to /src
+	import {Loading} from 'element-ui'
 export default {
-	components: {
-		ElCol,
-		ElRow,
-		Row,Col,Button,Form,FormItem,Input,Radio,Select,Option,Loading},
+	components: {Loading},
 	name: 'inventoryInfo',
 	data: function() {
 		return {
@@ -113,6 +108,7 @@ export default {
 		},
 		loading(){
 			let vm = this;
+
 			let parm = {
 				companyId: this.$route.query.companyId,
 				projectId: this.$route.query.projectId,
@@ -128,7 +124,11 @@ export default {
 					vm.summaryId =vm.dataList[0][0].summaryId;
 					for (let i =0;i <vm.dataList.length;i++){
 						for (let j =0;j <vm.dataList[i].length;j++){
-              vm.dataList[i][j].problemImg = []
+							if(!!vm.dataList[i][j].problemImg){
+								vm.dataList[i][j].problemImg = vm.dataList[i][j].problemImg.split(',')
+							}else{
+								vm.dataList[i][j].problemImg = []
+							}
 						}
 					}
 					vm.$nextTick(() =>{
@@ -192,13 +192,16 @@ export default {
       if(!acility){
 				return false
       }
+
 			for (let i =0;i <vm.dataList.length;i++){
 				for (let j =0;j <vm.dataList[i].length;j++){
-					if(!!vm.dataList[i][j].problemImg){
-						vm.dataList[i][j].problemImg = vm.dataList[i][j].problemImg.join(',')
-					}else{
-						vm.dataList[i][j].problemImg = ''
-					}
+					vm.dataList[i][j].imgs =vm.dataList[i][j].problemImg;
+					vm.dataList[i][j].problemImg = ''
+//					if(!!vm.dataList[i][j].problemImg){
+//						vm.dataList[i][j].problemImg = vm.dataList[i][j].problemImg.join(',')
+//					}else{
+//						vm.dataList[i][j].problemImg = ''
+//					}
 				}
 			}
 			vm.$http({method:'post', url:'/checklist/save', data:parm}).then((result) => {
@@ -206,9 +209,14 @@ export default {
 				if(data.successful && (data.status==200)){
 					vm.$message({
 						type: 'success',
-						message: "保存成功！"
+						message: "保存成功！",
+						showClose: true,
+						duration: 2000,
+            onClose: function () {
+	            window.location.reload()
+            }
           })
-          window.location.reload()
+
 				}else{
 					vm.$message.error('保存失败');
 				}

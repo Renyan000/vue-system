@@ -124,12 +124,12 @@
 										if(!!buttonId){
 											let buttonIds = JSON.parse(buttonId);
 											for(let j =0;j < buttonIds.length;j++){
-												// if(buttonIds[j].type == "1"){
+												 if(buttonIds[j].type == "1"){
 													if(!!btnStr){
 														btnStr += "-"
 													}
 													btnStr += buttonIds[j].id;
-												// }
+												 }
 											}
 											path += '?btnStr='+btnStr
 										}

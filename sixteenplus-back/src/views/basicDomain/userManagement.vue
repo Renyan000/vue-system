@@ -39,7 +39,9 @@
             </el-scrollbar>
         </el-row>
         <el-row class="paggingBox">
+          <el-col :span="24">
             <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" background layout="prev, pager, next" :total="totalItemsCount"></el-pagination>
+          </el-col>
         </el-row>
         <el-dialog title="用户信息" :visible.sync="dialogFormVisible" :modal-append-to-body='false'>
             <el-form :model="userInfo" :rules="rules" ref="userInfo" label-width="100px" >

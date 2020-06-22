@@ -22,7 +22,7 @@
       <el-col :span="24" style="text-align: right">
         <el-button size="small" icon="el-icon-download" @click="downLoadDoc">下载</el-button>
         <el-button type="primary" size="small" icon="el-icon-search" @click="searchList">查询</el-button>
-        <el-button type="primary" id="btn1" size="small" @click="addMenuBtn">添写</el-button>
+        <el-button type="primary" id="btn1" size="small" @click="addMenuBtn">填写</el-button>
       </el-col>
     </el-row>
     <el-row style="padding: 0 20px">
@@ -36,9 +36,9 @@
             <template slot-scope="scope">
               <el-button size="mini" @click="goto(scope.row,'check')" style="margin-left: 10px">查看</el-button>
               <el-button size="mini" type="info" v-if="scope.row.status=='1'||scope.row.status=='5'" @click="goto(scope.row,'edit')">修改</el-button>
-              <el-button size="mini" type="warning" v-if="scope.row.status=='2' || scope.row.status=='5'" @click="editMenu(scope.row,3)">确认</el-button>
-              <el-button size="mini" type="danger" v-if="scope.row.status=='3'" @click="editMenu(scope.row,5)">退回</el-button>
-              <el-button size="mini" type="success " v-if="scope.row.status=='3'" @click="showNameUrl(scope.row,4)">归档</el-button>
+              <el-button size="mini" type="warning" v-if="btnArr.indexOf('IM1')>=0 && (scope.row.status=='2' || scope.row.status=='5')" id='IM1' @click="editMenu(scope.row,3)">确认</el-button>
+              <el-button size="mini" type="danger" v-if="btnArr.indexOf('IM2')>=0 && scope.row.status=='3'" id='IM2' @click="editMenu(scope.row,5)">退回</el-button>
+              <el-button size="mini" type="success " v-if="btnArr.indexOf('IM3')>=0 && scope.row.status=='3'" id='IM3' @click="showNameUrl(scope.row,4)">归档</el-button>
               <el-button size="mini" type="primary" @click="exportInfo(scope.row)">导出</el-button>
               <el-button size="mini" type="primary" @click="exportImg(scope.row)">导出图片</el-button>
             </template>
@@ -46,15 +46,20 @@
         </el-table>
       </el-scrollbar>
     </el-row>
+    <el-row class="paggingBox">
+      <el-col :span="24">
+        <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" background layout="prev, pager, next" :total="totalItemsCount"></el-pagination>
+      </el-col>
+    </el-row>
     <el-dialog title="添加" :visible.sync="dialogFormVisible" :modal-append-to-body='false' width="500px">
       <el-form :model="userInfo" ref="userInfo" label-width="100px" >
         <el-form-item label="单位名称">
-          <el-select v-model="userInfo.companyId" placeholder="请选择" @change="choseCom2">
+          <el-select v-model="userInfo.companyId" clearable filterable placeholder="请选择" @change="choseCom2">
             <el-option v-for="item in companyOptions" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="项目名称">
-          <el-select v-model="userInfo.projectId" placeholder="请选择">
+          <el-select v-model="userInfo.projectId" clearable filterable placeholder="请选择">
             <el-option v-for="item in projectOptions2" :key="item.projectId" :label="item.projectName" :value="item.projectId"></el-option>
           </el-select>
         </el-form-item>
@@ -84,6 +89,7 @@
       </div>
     </el-dialog>
     <a href="javascript: ;" id="exportBtn" target="_blank" @click="exportExcal"></a>
+    <router-link :to="path" @click.native="todo" style="opacity: 0"><span ref="goto">跳转</span></router-link>
   </div>
 </template>
 
@@ -111,14 +117,43 @@ export default {
 			loading1: false,
 			loading2: false,
 			signImg: '',//签名照
-			parms: ''
+			parms: '',
+			btnArr: [],
+			currentPage:1,
+			totalItemsCount:0,
+			path: '',
+			isIE: false
 		}
 	},
 	created(){
-//  	this.loading(1);
+  	this.loading(1);
 		this.loadingOrgin();
+		this.btnControl();
 	},
+	mounted(){
+		if (!!window.ActiveXObject || "ActiveXObject" in window){
+			this.isIE = true
+			window.addEventListener('hashchange', () => {
+				var currentPath = window.location.hash.slice(1)
+				if (this.$route.path !== currentPath) {
+					this.$router.push(currentPath)
+				}
+			}, false)
+		} else{
+			this.isIE = false
+		}
+
+  },
 	methods: {
+		todo() {},
+		btnControl(){
+			if(window.location.href.indexOf('?')>=0){
+				let btnStr =window.location.href.split('?')[1].split('=')[1];
+				if(!!btnStr){
+					this.btnArr = btnStr.split("-");
+				}
+			}
+		},
 		handleAvatarSuccess(res, file) {
 			this.info.signImg = res.data;
 			this.loading1 = false;
@@ -132,6 +167,7 @@ export default {
 				pageSize: 10,
 				companyId: this.companyId,
 				projectId: this.projectId,
+				managerId: this.$utils.getCookie('managerId'),
 				pageNumber: pageNum
 			}
 //			if(!this.companyId || !this.projectId){
@@ -144,6 +180,8 @@ export default {
 				this.loadingIcon = false;
 				if(data.successful && (data.status==200)){
 					this.menuList = data.data.list;
+					this.totalItemsCount = data.data.total;
+					this.currentPage = data.data.pageNum;
 					//1未提交 2已提交 3 确认 4 归档 5打回
 					for(let item of this.menuList){
             if(item.status === 1){
@@ -175,6 +213,7 @@ export default {
 				vm.$message.error('请选择项目和单位!');
       }else{
 				vm.loading2 = true;
+				vm.path = './inventoryInfo?companyId='+vm.userInfo.companyId+'&projectId='+vm.userInfo.projectId+'&type=add'
 				let parm = {
 					companyId: vm.userInfo.companyId,
 					projectId: vm.userInfo.projectId
@@ -184,14 +223,15 @@ export default {
 					if(!data.successful && (data.resultCode.code=== 'FAIL')){
 						vm.$message.error(data.resultCode.message)
 					}else if(data.successful && (data.resultCode.code=== 'SUCCESS')){
-						vm.$router.push({
-							path: './inventoryInfo',
-							query: {
-								companyId: vm.userInfo.companyId,
-								projectId: vm.userInfo.projectId,
-								type: 'add'
-							}
-						})
+						 vm.$refs.goto.click()
+//							vm.$router.push({
+//								"path": './inventoryInfo',
+//								"query": {
+//									"companyId": vm.userInfo.companyId,
+//									"projectId": vm.userInfo.projectId,
+//									"type": 'add'
+//								}
+//							})
 					}else{
 						vm.$message.error('查询失败');
           }
@@ -312,8 +352,11 @@ export default {
 		},
 		searchList(){
       this.loading(1)
-    }
-
+    },
+		//分页触发事件
+		handleCurrentChange(val){
+			this.loading(val)
+		},
 	}
 }
 </script>

@@ -18,7 +18,7 @@
       <el-scrollbar style="height: 100%">
         <el-table :data="menuList" style="width: 100%" v-loading="loadingIcon">
           <el-table-column prop="companyName" label="单位名称" width=""></el-table-column>
-		  <el-table-column prop="groupName" label="检查组" width=""></el-table-column>
+		      <el-table-column prop="groupName" label="检查组" width=""></el-table-column>
           <el-table-column fixed="right" label="操作" width="200">
             <template slot-scope="scope">
               <el-button size="mini" id="btn2" @click="editMenu(scope.row)">修改</el-button>
@@ -27,6 +27,11 @@
           </el-table-column>
         </el-table>
       </el-scrollbar>
+    </el-row>
+    <el-row class="paggingBox">
+      <el-col :span="24">
+        <el-pagination @current-change="handleCurrentChange" :current-page.sync="currentPage" background layout="prev, pager, next" :total="totalItemsCount"></el-pagination>
+      </el-col>
     </el-row>
     <el-dialog title="添加" :visible.sync="dialogFormVisible" :modal-append-to-body='false' width="500px">
       <el-form :model="userInfo" ref="userInfo" label-width="100px" >
@@ -72,7 +77,9 @@ export default {
 				companyName: '',
 				managerIds: '',
 				groupName: ''
-			}
+			},
+			currentPage:1,
+			totalItemsCount:0,
 		}
 	},
 	created(){
@@ -142,6 +149,8 @@ export default {
 				this.loadingIcon = false;
 				if(data.successful && (data.status==200)){
           this.menuList = data.data.list;
+					this.totalItemsCount = data.data.total;
+					this.currentPage = data.data.pageNum;
 				}else{
 					this.$message.error('查询失败');
 				}
@@ -177,21 +186,23 @@ export default {
 			this.dialogFormVisible = true;
 			this.userInfo.id = row.id;
 			this.userInfo.companyName = row.companyName;
-			this.groupOption.map((item,index) => {
-				if (row.managerIds == item.id) {
-					this.userInfo.managerIds = item.departmentName;
-				}
-			})
-			// this.userInfo.managerIds = row.managerIds;
+			this.userInfo.managerIds = item.managerIds;
+			this.userInfo.groupName = item.groupName;
 		},
 		addMenuBtn(formName){
-			this.userInfo.companyName = "";
-			this.userInfo.managerIds = "";
+			this.userInfo = {
+				companyName: '',
+				managerIds: ''
+      }
 			this.dialogFormVisible = true;
 		},
 		searchList(){
 			this.loading(1)
-    }
+    },
+		//分页触发事件
+		handleCurrentChange(val){
+			this.loading(val)
+		},
 	}
 }
 </script>
