@@ -18,7 +18,7 @@
         </div>
       </el-col>
     </el-row>
-    <el-row style="padding: 0 20px">
+    <el-row style="padding: 10px 20px 0">
       <el-col :span="24" style="text-align: right">
         <el-button size="small" icon="el-icon-download" @click="downLoadDoc">下载</el-button>
         <el-button type="primary" size="small" icon="el-icon-search" @click="searchList">查询</el-button>
@@ -31,16 +31,16 @@
           <el-table-column prop="companyName" label="单位名称" width=""></el-table-column>
           <el-table-column prop="projectName" label="项目名称" width=""></el-table-column>
           <el-table-column prop="createTime" label="检查时间" width="100"></el-table-column>
-          <el-table-column prop="statusText" label="状态" width="100"></el-table-column>
-          <el-table-column fixed="right" label="操作" width="520">
+          <el-table-column prop="statusText" label="状态" width=""></el-table-column>
+          <el-table-column fixed="right" label="操作" width="">
             <template slot-scope="scope">
-              <el-button size="mini" @click="goto(scope.row,'check')" style="margin-left: 10px">查看</el-button>
-              <el-button size="mini" type="info" v-if="scope.row.status=='1'||scope.row.status=='5'" @click="goto(scope.row,'edit')">修改</el-button>
-              <el-button size="mini" type="warning" v-if="btnArr.indexOf('IM1')>=0 && (scope.row.status=='2' || scope.row.status=='5')" id='IM1' @click="editMenu(scope.row,3)">确认</el-button>
-              <el-button size="mini" type="danger" v-if="btnArr.indexOf('IM2')>=0 && scope.row.status=='3'" id='IM2' @click="editMenu(scope.row,5)">退回</el-button>
-              <el-button size="mini" type="success " v-if="btnArr.indexOf('IM3')>=0 && scope.row.status=='3'" id='IM3' @click="showNameUrl(scope.row,4)">归档</el-button>
-              <el-button size="mini" type="primary" @click="exportInfo(scope.row)">导出</el-button>
-              <el-button size="mini" type="primary" @click="exportImg(scope.row)">导出图片</el-button>
+              <el-button size="mini" type="text" @click="goto(scope.row,'check')" style="margin-left: 10px">查看</el-button>
+              <el-button size="mini" type="text" v-if="scope.row.status=='1'||scope.row.status=='5'" @click="goto(scope.row,'edit')">修改</el-button>
+              <el-button size="mini" type="text" v-if="btnArr.indexOf('IM1')>=0 && (scope.row.status=='2' || scope.row.status=='5')" id='IM1' @click="editMenu(scope.row,3)">确认</el-button>
+              <el-button size="mini" type="text" v-if="btnArr.indexOf('IM2')>=0 && scope.row.status=='3'" id='IM2' @click="editMenu(scope.row,5)">退回</el-button>
+              <el-button size="mini" type="text" v-if="btnArr.indexOf('IM3')>=0 && scope.row.status=='3'" id='IM3' @click="showNameUrl(scope.row,4)">归档</el-button>
+              <el-button size="mini" type="text" v-if="scope.row.status=='3'|| scope.row.status=='4'" @click="exportInfo(scope.row)">导出</el-button>
+              <el-button size="mini" type="text" v-if="scope.row.status=='3'|| scope.row.status=='4'" @click="exportImg(scope.row)">导出图片</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -160,7 +160,7 @@ export default {
 		},
 		beforeAvatarUpload(file) {
 			this.loading1 = true;
-      return true;
+            return true;
 		},
 		loading(pageNum){
 			let parm = {
@@ -184,36 +184,44 @@ export default {
 					this.currentPage = data.data.pageNum;
 					//1未提交 2已提交 3 确认 4 归档 5打回
 					for(let item of this.menuList){
-            if(item.status === 1){
-	            item.statusText = '未提交'
-            }else if(item.status === 2){
-	            item.statusText = '已提交'
-            }else if(item.status === 3){
-	            item.statusText = '确认'
-            }else if(item.status === 4){
-	            item.statusText = '归档'
-            }else if(item.status === 5){
-	            item.statusText = '打回'
-            }
-          }
+                    if(item.status === 1){
+                        item.statusText = '未提交'
+                    }else if(item.status === 2){
+                        item.statusText = '已提交'
+                    }else if(item.status === 3){
+                        item.statusText = '确认'
+                    }else if(item.status === 4){
+                        item.statusText = '归档'
+                    }else if(item.status === 5){
+                        item.statusText = '打回'
+                    }
+                  }
 				}else{
 					this.$message.error('查询失败');
 				}
 			},(error) => {
 				this.$message.error('查询失败');
 			});
-    },
+        },
 		addMenuBtn(){
-      this.dialogFormVisible = true;
-    },
+            this.dialogFormVisible = true;
+        },
+		selectGet(value) {
+			let obj ={}
+			obj = this.projectOptions2.find((item)=>{
+				return item.projectId === value;
+			});
+			return obj.projectName
+		},
 		//新增
 		addMenu(formName){
 			let vm = this;
 			if(!vm.userInfo.companyId || !vm.userInfo.projectId){
 				vm.$message.error('请选择项目和单位!');
-      }else{
+            }else{
 				vm.loading2 = true;
-				vm.path = './inventoryInfo?companyId='+vm.userInfo.companyId+'&projectId='+vm.userInfo.projectId+'&type=add'
+                let projectName = vm.selectGet(vm.userInfo.projectId)
+				vm.path = './inventoryInfo?companyId='+vm.userInfo.companyId+'&projectId='+vm.userInfo.projectId+'&type=add&projectName='+projectName;
 				let parm = {
 					companyId: vm.userInfo.companyId,
 					projectId: vm.userInfo.projectId
@@ -293,14 +301,16 @@ export default {
 			});
     },
 		goto(row,type){
-      this.$router.push({
-        path: '/activityManagement/inventoryInfo',
-	      query: {
-		      id: row.id,
-          type: type
-	      }
-      })
-    },
+          this.$router.push({
+            path: '/activityManagement/inventoryInfo',
+              query: {
+                  id: row.id,
+                  type: type,
+                  projectName: row.projectName,
+	              status: row.status
+              }
+          })
+        },
 		submitName(){
       if(!this.info.signImg){
       	this.$message.error('请先上传签名照！')
@@ -309,31 +319,45 @@ export default {
       	this.dialogFormVisible2 = false;
       }
     },
-		//修改
-		editMenu(row,index){//4 归档的时候要上传提交签名照片
-			let parm = {
-				"managerId": this.$utils.getCookie("managerId"),
-				"status": index,
-				"summaryId": row.id
-      }
-      if(index === 4){
-	      parm.signImg = this.info.signImg;
-      }
-			this.$http({method:'post', url:'/checklist/submit', data:parm}).then((result) => {
-				let data = result.data;
-				if(data.successful && (data.status==200)){
-					this.$message.success('操作成功！')
-          this.loading(1);
-				}else{
-					this.$message.error('查询失败');
-				}
-			},(error) => {
-				this.$message.error('查询失败');
-			});
-		},
-		showNameUrl(row,index){
-      this.info = row;
-      this.dialogFormVisible2 = true;
+    //修改
+    editMenu(row,index){//4 归档的时候要上传提交签名照片
+        let parm = {
+            "managerId": this.$utils.getCookie("managerId"),
+            "status": index,
+            "summaryId": row.id
+        }
+        if(index === 4){
+          parm.signImg = this.info.signImg;
+        }
+        if(index === 3){
+	        this.$confirm('是否确认?', '提示', {
+		        confirmButtonText: '是',
+		        cancelButtonText: '否',
+		        type: 'warning'
+	        }).then(() => {
+                this.saveInfo(parm)
+	        }).catch(() => {
+	        });
+        }else{
+	        this.saveInfo(parm)
+        }
+    },
+    saveInfo(parm){
+	    this.$http({method:'post', url:'/checklist/submit', data:parm}).then((result) => {
+		    let data = result.data;
+		    if(data.successful && (data.status==200)){
+			    this.$message.success('操作成功！')
+			    this.loading(1);
+		    }else{
+			    this.$message.error('查询失败');
+		    }
+	    },(error) => {
+		    this.$message.error('查询失败');
+	    });
+    },
+    showNameUrl(row,index){
+        this.info = row;
+        this.dialogFormVisible2 = true;
     },
 		downLoadDoc(){
 			this.parms = '/checklist/exportAll?managerId='+this.$utils.getCookie('managerId')
