@@ -328,14 +328,22 @@ export default {
         }
         if(index === 4){
           parm.signImg = this.info.signImg;
-        }
-        if(index === 3){
+        }else if(index === 3){
 	        this.$confirm('是否确认?', '提示', {
 		        confirmButtonText: '是',
 		        cancelButtonText: '否',
 		        type: 'warning'
 	        }).then(() => {
                 this.saveInfo(parm)
+	        }).catch(() => {
+	        });
+        }else if(index === 5){
+	        this.$confirm('是否退回?', '提示', {
+		        confirmButtonText: '是',
+		        cancelButtonText: '否',
+		        type: 'warning'
+	        }).then(() => {
+		        this.saveInfo(parm)
 	        }).catch(() => {
 	        });
         }else{
